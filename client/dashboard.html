@@ -1,0 +1,3664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TapEarn — Dashboard</title>
+  <meta name="description" content="Tap to Earn coins, climb leaderboards, refer friends, and withdraw rewards on TapEarn." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ════════════════════════════════════════════════
+       RESET & BASE
+    ════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-base:       #07090f;
+      --bg-surface:    #0e1120;
+      --bg-card:       rgba(255,255,255,0.04);
+      --bg-card-hover: rgba(255,255,255,0.07);
+      --border:        rgba(255,255,255,0.08);
+      --border-glow:   rgba(251,191,36,0.3);
+
+      --gold:          #f59e0b;
+      --gold-light:    #fcd34d;
+      --gold-dark:     #d97706;
+      --gold-glow:     rgba(245,158,11,0.25);
+
+      --purple:        #8b5cf6;
+      --purple-light:  #a78bfa;
+      --purple-dark:   #6d28d9;
+      --purple-glow:   rgba(139,92,246,0.25);
+
+      --cyan:          #06b6d4;
+      --green:         #10b981;
+      --red:           #ef4444;
+      --pink:          #ec4899;
+
+      --text-primary:  #f1f5f9;
+      --text-secondary:#94a3b8;
+      --text-muted:    #475569;
+
+      --radius-sm:     8px;
+      --radius-md:     14px;
+      --radius-lg:     20px;
+      --radius-xl:     28px;
+
+      --transition:    all 0.25s cubic-bezier(0.4,0,0.2,1);
+      --sidebar-w:     240px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ════════════════════════════════════════════════
+       BACKGROUND ORBS
+    ════════════════════════════════════════════════ */
+    .bg-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .bg-orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(139,92,246,0.12), transparent 70%);
+      top: -150px; left: -150px;
+    }
+    .bg-orb-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(245,158,11,0.08), transparent 70%);
+      bottom: 0; right: 200px;
+    }
+    .bg-orb-3 {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(6,182,212,0.07), transparent 70%);
+      top: 40%; left: 40%;
+    }
+
+    /* ════════════════════════════════════════════════
+       LAYOUT
+    ════════════════════════════════════════════════ */
+    .layout {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ════════════════════════════════════════════════
+       SIDEBAR
+    ════════════════════════════════════════════════ */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-logo {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 0 20px var(--gold-glow);
+    }
+    .logo-text {
+      font-size: 20px;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--gold-light), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
+      padding: 8px 10px 4px;
+      margin-top: 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+    .nav-item:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-primary);
+      border-color: var(--border);
+    }
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05));
+      color: var(--gold-light);
+      border-color: rgba(245,158,11,0.2);
+    }
+    .nav-item.active .nav-icon { color: var(--gold); }
+
+    .nav-icon {
+      font-size: 18px;
+      width: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--red);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 20px;
+    }
+
+    .sidebar-user {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .sidebar-user:hover { background: var(--bg-card); }
+
+    .user-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--purple-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+      border: 2px solid rgba(139,92,246,0.4);
+    }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: 13px; font-weight: 600; truncate: ellipsis; }
+    .user-level { font-size: 11px; color: var(--gold); font-weight: 500; }
+
+    /* ════════════════════════════════════════════════
+       MAIN CONTENT
+    ════════════════════════════════════════════════ */
+    .main {
+      flex: 1;
+      margin-left: var(--sidebar-w);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ════════════════════════════════════════════════
+       TOP BAR
+    ════════════════════════════════════════════════ */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(7,9,15,0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .topbar-hamburger {
+      display: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      padding: 4px;
+    }
+
+    .topbar-greeting {
+      flex: 1;
+    }
+    .topbar-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .topbar-subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .topbar-btn {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: var(--transition);
+      position: relative;
+    }
+    .topbar-btn:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-primary);
+      border-color: rgba(255,255,255,0.15);
+    }
+    .notif-dot {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 7px; height: 7px;
+      background: var(--red);
+      border-radius: 50%;
+      border: 1.5px solid var(--bg-base);
+    }
+
+    .topbar-avatar {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--purple), var(--gold-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      border: 2px solid rgba(139,92,246,0.4);
+      transition: var(--transition);
+    }
+    .topbar-avatar:hover { transform: scale(1.05); }
+
+    /* ════════════════════════════════════════════════
+       CONTENT AREA
+    ════════════════════════════════════════════════ */
+    .content {
+      flex: 1;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ════════════════════════════════════════════════
+       GLASS CARD
+    ════════════════════════════════════════════════ */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: var(--transition);
+    }
+    .card:hover {
+      border-color: rgba(255,255,255,0.12);
+    }
+    .card-header {
+      padding: 20px 22px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title-icon {
+      font-size: 18px;
+    }
+    .card-body { padding: 20px 22px; }
+
+    /* ════════════════════════════════════════════════
+       PROFILE HERO SECTION
+    ════════════════════════════════════════════════ */
+    .hero-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+    }
+
+    /* Profile Card */
+    .profile-card {
+      background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(245,158,11,0.05));
+      border-color: rgba(139,92,246,0.25);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-card::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(139,92,246,0.2), transparent 70%);
+    }
+    .profile-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .profile-avatar-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .profile-avatar {
+      width: 58px; height: 58px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 800;
+      border: 2px solid rgba(139,92,246,0.5);
+      box-shadow: 0 0 20px rgba(139,92,246,0.3);
+    }
+    .profile-online {
+      position: absolute;
+      bottom: 2px; right: 2px;
+      width: 12px; height: 12px;
+      background: var(--green);
+      border-radius: 50%;
+      border: 2px solid var(--bg-surface);
+    }
+    .profile-name {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 3px;
+    }
+    .profile-handle {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    .level-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(90deg, rgba(245,158,11,0.2), rgba(245,158,11,0.1));
+      border: 1px solid rgba(245,158,11,0.3);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gold-light);
+    }
+    .profile-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+    .profile-stat {
+      text-align: center;
+      padding: 10px 6px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .profile-stat-value {
+      font-size: 16px;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--gold-light), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .profile-stat-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    /* Coin Balance Card */
+    .coin-card {
+      background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(245,158,11,0.04));
+      border-color: rgba(245,158,11,0.2);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .coin-card::after {
+      content: '🪙';
+      position: absolute;
+      bottom: -10px; right: -10px;
+      font-size: 100px;
+      opacity: 0.06;
+      line-height: 1;
+    }
+    .coin-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+    .coin-amount {
+      font-size: 38px;
+      font-weight: 900;
+      background: linear-gradient(90deg, var(--gold-light), var(--gold), var(--gold-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 6px;
+      letter-spacing: -1px;
+    }
+    .coin-usd {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 18px;
+    }
+    .coin-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--green);
+      background: rgba(16,185,129,0.12);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(16,185,129,0.2);
+    }
+    .coin-mini-stats {
+      display: flex;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .coin-mini-stat {
+      flex: 1;
+      padding: 10px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .coin-mini-label { font-size: 10px; color: var(--text-muted); font-weight: 500; }
+    .coin-mini-value { font-size: 15px; font-weight: 700; color: var(--gold-light); margin-top: 2px; }
+
+    /* Quick Stats Card */
+    .stats-card {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .stats-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    .stat-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      transition: var(--transition);
+    }
+    .stat-row:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(255,255,255,0.12);
+    }
+    .stat-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .stat-icon-wrap {
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .stat-icon-gold { background: rgba(245,158,11,0.15); }
+    .stat-icon-purple { background: rgba(139,92,246,0.15); }
+    .stat-icon-green { background: rgba(16,185,129,0.15); }
+    .stat-icon-cyan { background: rgba(6,182,212,0.15); }
+    .stat-name { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+    .stat-value { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+
+    /* ════════════════════════════════════════════════
+       TAP SECTION
+    ════════════════════════════════════════════════ */
+    .tap-section {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .tap-card {
+      padding: 36px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(245,158,11,0.05));
+      border-color: rgba(139,92,246,0.2);
+    }
+    .tap-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 60%, rgba(139,92,246,0.06), transparent 70%);
+      pointer-events: none;
+    }
+
+    .tap-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .tap-earned-today {
+      font-size: 28px;
+      font-weight: 900;
+      background: linear-gradient(90deg, var(--gold-light), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 32px;
+    }
+
+    /* Tap Button */
+    .tap-btn-wrap {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+    .tap-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid rgba(139,92,246,0.3);
+      animation: ring-spin 4s linear infinite;
+    }
+    .tap-ring-2 {
+      inset: -12px;
+      border-color: rgba(245,158,11,0.15);
+      animation: ring-spin 6s linear infinite reverse;
+    }
+    .tap-ring-3 {
+      inset: -24px;
+      border-color: rgba(6,182,212,0.1);
+      animation: ring-spin 8s linear infinite;
+      border-style: dashed;
+    }
+    @keyframes ring-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .tap-pulse-outer {
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(139,92,246,0.15), transparent 70%);
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50%       { transform: scale(1.08); opacity: 1; }
+    }
+
+    #tapBtn {
+      width: 168px; height: 168px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #7c3aed, #8b5cf6, #a78bfa);
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      box-shadow:
+        0 0 0 4px rgba(139,92,246,0.15),
+        0 0 40px rgba(139,92,246,0.4),
+        0 20px 60px rgba(0,0,0,0.5);
+      transition: transform 0.08s cubic-bezier(0.4,0,0.2,1),
+                  box-shadow 0.08s ease;
+      user-select: none;
+      -webkit-user-select: none;
+      z-index: 2;
+    }
+    #tapBtn:hover {
+      box-shadow:
+        0 0 0 6px rgba(139,92,246,0.2),
+        0 0 60px rgba(139,92,246,0.5),
+        0 24px 70px rgba(0,0,0,0.5);
+    }
+    #tapBtn:active, #tapBtn.tapping {
+      transform: scale(0.93);
+      box-shadow:
+        0 0 0 8px rgba(139,92,246,0.3),
+        0 0 80px rgba(139,92,246,0.7),
+        0 10px 40px rgba(0,0,0,0.5);
+    }
+    .tap-btn-icon { font-size: 42px; line-height: 1; }
+    .tap-btn-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.8);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .tap-btn-power {
+      font-size: 11px;
+      color: rgba(255,255,255,0.55);
+      font-weight: 500;
+    }
+
+    /* Energy Bar */
+    .energy-section { width: 100%; }
+    .energy-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .energy-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .energy-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--purple-light);
+    }
+    .energy-bar-track {
+      width: 100%;
+      height: 10px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 6px;
+      border: 1px solid var(--border);
+    }
+    #energyFill {
+      height: 100%;
+      width: 75%;
+      background: linear-gradient(90deg, var(--purple-dark), var(--purple), var(--purple-light));
+      border-radius: 10px;
+      transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+      position: relative;
+      overflow: hidden;
+    }
+    #energyFill::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shimmer 2s infinite;
+    }
+    @keyframes shimmer {
+      to { left: 200%; }
+    }
+    .energy-refill {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Tap sidebar info */
+    .tap-side {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .tap-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .tap-stat-mini {
+      padding: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      transition: var(--transition);
+    }
+    .tap-stat-mini:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(255,255,255,0.12);
+    }
+    .tap-stat-mini-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .tap-stat-mini-value {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+    .tap-stat-mini-value.gold { color: var(--gold-light); }
+    .tap-stat-mini-value.purple { color: var(--purple-light); }
+    .tap-stat-mini-value.green { color: var(--green); }
+    .tap-stat-mini-value.cyan { color: var(--cyan); }
+
+    /* ════════════════════════════════════════════════
+       BOTTOM GRID
+    ════════════════════════════════════════════════ */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* ════════════════════════════════════════════════
+       DAILY REWARD CARD
+    ════════════════════════════════════════════════ */
+    .daily-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 16px;
+    }
+    .daily-day {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-size: 10px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      transition: var(--transition);
+      cursor: default;
+    }
+    .daily-day.claimed {
+      background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.05));
+      border-color: rgba(16,185,129,0.3);
+      color: var(--green);
+    }
+    .daily-day.today {
+      background: linear-gradient(135deg, rgba(245,158,11,0.25), rgba(245,158,11,0.1));
+      border-color: rgba(245,158,11,0.5);
+      color: var(--gold-light);
+      box-shadow: 0 0 12px rgba(245,158,11,0.2);
+      animation: today-pulse 2s ease-in-out infinite;
+    }
+    @keyframes today-pulse {
+      0%, 100% { box-shadow: 0 0 12px rgba(245,158,11,0.2); }
+      50%       { box-shadow: 0 0 20px rgba(245,158,11,0.4); }
+    }
+    .daily-day-num { font-size: 9px; opacity: 0.6; }
+    .daily-day-icon { font-size: 14px; }
+    .daily-day-coins { font-size: 9px; font-weight: 700; }
+
+    .daily-streak {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: linear-gradient(90deg, rgba(245,158,11,0.1), transparent);
+      border-radius: 10px;
+      border: 1px solid rgba(245,158,11,0.2);
+      margin-bottom: 14px;
+    }
+    .streak-icon { font-size: 20px; }
+    .streak-text { flex: 1; }
+    .streak-label { font-size: 11px; color: var(--text-muted); }
+    .streak-value { font-size: 14px; font-weight: 800; color: var(--gold); }
+
+    .btn-claim {
+      width: 100%;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      color: #0a0600;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 4px 20px rgba(245,158,11,0.3);
+    }
+    .btn-claim:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(245,158,11,0.45);
+    }
+    .btn-claim:active { transform: translateY(0); }
+    .btn-claim:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ════════════════════════════════════════════════
+       REFERRAL CARD
+    ════════════════════════════════════════════════ */
+    .referral-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .ref-stat {
+      text-align: center;
+      padding: 12px 8px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .ref-stat-value { font-size: 20px; font-weight: 800; color: var(--purple-light); }
+    .ref-stat-label { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+    .referral-link-wrap {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .referral-link-input {
+      flex: 1;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      outline: none;
+      cursor: default;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .btn-copy {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(139,92,246,0.4);
+      background: rgba(139,92,246,0.15);
+      color: var(--purple-light);
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition);
+    }
+    .btn-copy:hover {
+      background: rgba(139,92,246,0.25);
+      border-color: rgba(139,92,246,0.6);
+    }
+    .ref-tier-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .ref-tier {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-secondary);
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .ref-tier:last-child { border-bottom: none; }
+    .ref-tier-name { font-weight: 500; }
+    .ref-tier-earn { color: var(--green); font-weight: 700; }
+
+    /* ════════════════════════════════════════════════
+       WITHDRAWAL CARD
+    ════════════════════════════════════════════════ */
+    .withdrawal-balance {
+      text-align: center;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(6,182,212,0.05));
+      border-radius: 12px;
+      border: 1px solid rgba(16,185,129,0.2);
+      margin-bottom: 14px;
+    }
+    .withdrawal-balance-label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+    .withdrawal-balance-amount {
+      font-size: 28px;
+      font-weight: 900;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 4px 0;
+    }
+    .withdrawal-balance-usd { font-size: 12px; color: var(--text-muted); }
+
+    .withdrawal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .form-input {
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      outline: none;
+      transition: var(--transition);
+      width: 100%;
+    }
+    .form-input:focus {
+      border-color: rgba(16,185,129,0.4);
+      background: rgba(16,185,129,0.05);
+    }
+    .form-input::placeholder { color: var(--text-muted); }
+    .form-select {
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .form-select option { background: #1a1f36; }
+    .btn-withdraw {
+      width: 100%;
+      padding: 11px;
+      border-radius: 8px;
+      border: none;
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 4px 16px rgba(16,185,129,0.25);
+    }
+    .btn-withdraw:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(16,185,129,0.35);
+    }
+    .withdrawal-note {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 2px;
+    }
+
+    /* ════════════════════════════════════════════════
+       LEADERBOARD CARD
+    ════════════════════════════════════════════════ */
+    .leaderboard-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .lb-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      transition: var(--transition);
+      cursor: default;
+    }
+    .lb-item:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border);
+    }
+    .lb-item.me {
+      background: linear-gradient(90deg, rgba(139,92,246,0.1), rgba(139,92,246,0.04));
+      border-color: rgba(139,92,246,0.25);
+    }
+    .lb-rank {
+      width: 26px;
+      font-size: 13px;
+      font-weight: 800;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .lb-rank.gold   { color: #fbbf24; }
+    .lb-rank.silver { color: #94a3b8; }
+    .lb-rank.bronze { color: #cd7c40; }
+    .lb-rank.normal { color: var(--text-muted); }
+
+    .lb-avatar {
+      width: 32px; height: 32px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .lb-info { flex: 1; min-width: 0; }
+    .lb-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .lb-taps { font-size: 11px; color: var(--text-muted); }
+    .lb-coins {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--gold-light);
+      white-space: nowrap;
+    }
+    .lb-change { font-size: 11px; font-weight: 600; margin-left: 4px; }
+    .lb-change.up { color: var(--green); }
+    .lb-change.down { color: var(--red); }
+    .lb-change.same { color: var(--text-muted); }
+
+    .lb-me-label {
+      font-size: 10px;
+      background: rgba(139,92,246,0.2);
+      color: var(--purple-light);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    .view-full-lb {
+      display: block;
+      text-align: center;
+      margin-top: 12px;
+      padding: 9px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .view-full-lb:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-primary);
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    /* ════════════════════════════════════════════════
+       FLOATING COIN PARTICLES
+    ════════════════════════════════════════════════ */
+    .coin-particle {
+      position: fixed;
+      font-size: 20px;
+      pointer-events: none;
+      z-index: 9999;
+      animation: coin-fly 0.9s ease-out forwards;
+      user-select: none;
+    }
+    @keyframes coin-fly {
+      0%   { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-120px) scale(0.4) rotate(360deg); opacity: 0; }
+    }
+
+    /* ════════════════════════════════════════════════
+       TOAST
+    ════════════════════════════════════════════════ */
+    #toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: rgba(14,17,32,0.95);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      backdrop-filter: blur(20px);
+      z-index: 9998;
+      transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s;
+      opacity: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      white-space: nowrap;
+    }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ════════════════════════════════════════════════
+       MOBILE OVERLAY
+    ════════════════════════════════════════════════ */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 99;
+      backdrop-filter: blur(4px);
+    }
+
+    /* ════════════════════════════════════════════════
+       SCROLLBAR
+    ════════════════════════════════════════════════ */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.08);
+      border-radius: 4px;
+    }
+
+    /* ════════════════════════════════════════════════
+       RESPONSIVE
+    ════════════════════════════════════════════════ */
+    @media (max-width: 1280px) {
+      .bottom-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .hero-section {
+        grid-template-columns: 1fr 1fr;
+      }
+      .stats-card { display: none; }
+      .tap-section {
+        grid-template-columns: 1fr;
+      }
+      .tap-side {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+      .tap-stats-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      :root { --sidebar-w: 0px; }
+      .sidebar {
+        transform: translateX(-240px);
+        width: 240px;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+        --sidebar-w: 240px;
+      }
+      .sidebar-overlay.show { display: block; }
+      .main { margin-left: 0; }
+      .topbar-hamburger { display: flex; }
+      .topbar { padding: 0 16px; }
+      .content { padding: 16px; gap: 16px; }
+      .hero-section { grid-template-columns: 1fr; }
+      .tap-section { grid-template-columns: 1fr; }
+      .tap-side {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .tap-stats-grid { grid-template-columns: 1fr 1fr; }
+      .bottom-grid { grid-template-columns: 1fr; }
+      #tapBtn { width: 140px; height: 140px; }
+      .tap-btn-wrap { width: 160px; height: 160px; }
+      .tap-btn-icon { font-size: 34px; }
+    }
+
+    @media (max-width: 480px) {
+      .hero-section { grid-template-columns: 1fr; }
+      .tap-side { grid-template-columns: 1fr 1fr; }
+      .daily-days { grid-template-columns: repeat(7, 1fr); gap: 3px; }
+      .coin-mini-stats { gap: 8px; }
+    }
+
+    /* ── TAP LOCK / NO-ENERGY STATE ── */
+    #tapBtn.locked { cursor:not-allowed; opacity:0.65; transform:scale(0.97); }
+    #tapBtn.no-energy {
+      background: linear-gradient(135deg,#374151,#4b5563) !important;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5) !important;
+      cursor: not-allowed;
+    }
+
+    /* ── COMBO BADGE ── */
+    .combo-badge {
+      position:absolute; top:-18px; left:50%;
+      transform:translateX(-50%) scale(0);
+      background:linear-gradient(135deg,#f59e0b,#d97706);
+      color:#0a0600; font-size:11px; font-weight:900;
+      padding:3px 12px; border-radius:20px;
+      white-space:nowrap; pointer-events:none; z-index:10;
+      transition:transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 4px 14px rgba(245,158,11,0.4);
+    }
+    .combo-badge.show { transform:translateX(-50%) scale(1); }
+
+    /* ── REQUEST INDICATOR ── */
+    .req-indicator {
+      display:flex; align-items:center; gap:6px;
+      font-size:11px; color:var(--text-muted);
+      margin-top:8px; height:16px; justify-content:center;
+    }
+    .req-dot {
+      width:6px; height:6px; border-radius:50%;
+      background:var(--green); transition:background 0.3s;
+    }
+    .req-dot.pending { background:var(--gold); animation:dot-pulse 0.8s ease-in-out infinite; }
+    .req-dot.error   { background:var(--red); }
+    @keyframes dot-pulse {
+      0%,100%{ transform:scale(1); opacity:1; }
+      50%    { transform:scale(1.5); opacity:0.7; }
+    }
+
+    /* ── CHEAT WARNING ── */
+    .cheat-warning {
+      display:none; padding:10px 14px;
+      background:rgba(239,68,68,0.12);
+      border:1px solid rgba(239,68,68,0.3);
+      border-radius:10px; font-size:12px;
+      color:#fca5a5; font-weight:600;
+      text-align:center; margin-top:10px;
+      animation:fadeIn 0.3s ease;
+    }
+    .cheat-warning.show { display:block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+
+    /* ── LIFETIME PROGRESS ── */
+    .lifetime-wrap { width:100%; margin-top:14px; }
+    .lifetime-header {
+      display:flex; justify-content:space-between;
+      font-size:11px; color:var(--text-muted); margin-bottom:5px;
+    }
+    .lifetime-bar-track {
+      height:4px; background:rgba(255,255,255,0.06);
+      border-radius:4px; overflow:hidden;
+    }
+    .lifetime-bar-fill {
+      height:100%;
+      background:linear-gradient(90deg,var(--gold-dark),var(--gold));
+      border-radius:4px; transition:width 0.5s ease;
+    }
+
+    /* ── FLOATING +N LABEL ── */
+    .float-label {
+      position:fixed; font-size:17px; font-weight:900;
+      color:var(--gold-light); pointer-events:none; z-index:9999;
+      text-shadow:0 0 12px rgba(245,158,11,0.7);
+      animation:float-up 0.85s ease-out forwards;
+      user-select:none;
+    }
+    @keyframes float-up {
+      0%  { transform:translateY(0) scale(1); opacity:1; }
+      70% { transform:translateY(-70px) scale(1.1); opacity:0.9; }
+      100%{ transform:translateY(-100px) scale(0.8); opacity:0; }
+    }
+
+    /* ════════════════════════════════════════════════
+       REFERRAL SYSTEM — NEW STYLES
+    ════════════════════════════════════════════════ */
+    .ref-badge {
+      font-size:11px; font-weight:700; color:var(--purple-light);
+      background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.3);
+      padding:3px 10px; border-radius:20px;
+    }
+    .referral-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .ref-stat {
+      text-align: center;
+      padding: 10px 6px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .ref-stat-value {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--purple-light);
+      line-height: 1;
+    }
+    .ref-stat-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    /* Code display */
+    .ref-code-section {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .ref-code-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .ref-code-display {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 6px;
+      background: linear-gradient(135deg, var(--gold), var(--purple-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      padding: 8px 0;
+      cursor: pointer;
+    }
+
+    /* Share buttons */
+    .ref-share-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .ref-share-btn {
+      flex: 1;
+      padding: 8px 6px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    .ref-share-btn:hover {
+      background: rgba(139,92,246,0.12);
+      border-color: rgba(139,92,246,0.3);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+
+    /* Validate code section */
+    .ref-validate-wrap {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+    .ref-validate-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .ref-validate-row {
+      display: flex;
+      gap: 8px;
+    }
+    .ref-validate-input {
+      flex: 1;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--text-primary);
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      outline: none;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: var(--transition);
+    }
+    .ref-validate-input:focus {
+      border-color: rgba(139,92,246,0.4);
+      background: rgba(139,92,246,0.05);
+    }
+    .ref-validate-btn {
+      padding: 8px 14px;
+      background: linear-gradient(135deg, var(--purple-dark), var(--purple));
+      border: none;
+      border-radius: 7px;
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .ref-validate-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(139,92,246,0.3);
+    }
+    .ref-validate-result {
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      min-height: 18px;
+      transition: all 0.3s ease;
+    }
+    .ref-validate-result.ok   { color: var(--green); }
+    .ref-validate-result.err  { color: var(--red); }
+
+    /* How It Works tiers */
+    .ref-tier-list {
+      margin-bottom: 14px;
+    }
+    .ref-tier-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .ref-tier {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 6px;
+      transition: var(--transition);
+    }
+    .ref-tier:hover {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(139,92,246,0.2);
+    }
+    .ref-tier-step {
+      width: 24px; height: 24px;
+      background: linear-gradient(135deg, var(--purple-dark), var(--purple));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 900; color: #fff;
+      flex-shrink: 0;
+    }
+    .ref-tier-body { flex: 1; }
+    .ref-tier-name {
+      font-size: 12px; font-weight: 600; color: var(--text-primary);
+    }
+    .ref-tier-sub {
+      font-size: 10px; color: var(--text-muted); margin-top: 2px;
+    }
+    .ref-tier-earn {
+      font-size: 12px; font-weight: 800; color: var(--green);
+      text-align: right; line-height: 1.3; flex-shrink: 0;
+    }
+    .ref-tier-earn small { font-size: 9px; color: var(--text-muted); font-weight: 500; }
+
+    /* Referral list */
+    .ref-list-section { margin-top: 4px; }
+    .ref-list-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .ref-list-header > span {
+      font-size: 12px; font-weight: 700; color: var(--text-secondary);
+    }
+    .ref-view-all {
+      font-size: 11px; font-weight: 600; color: var(--purple-light);
+      background: none; border: none; cursor: pointer; padding: 0;
+      font-family: 'Outfit', sans-serif;
+      transition: var(--transition);
+    }
+    .ref-view-all:hover { color: var(--purple); }
+    .ref-list { display: flex; flex-direction: column; gap: 6px; }
+    .ref-list-item {
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      transition: var(--transition);
+    }
+    .ref-list-item:hover { background: rgba(255,255,255,0.05); }
+    .ref-list-item-top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .ref-list-username {
+      font-size: 13px; font-weight: 700; color: var(--text-primary);
+    }
+    .ref-list-status {
+      font-size: 10px; font-weight: 700;
+      padding: 2px 8px; border-radius: 10px;
+    }
+    .ref-list-status.active {
+      background: rgba(16,185,129,0.15); color: var(--green);
+    }
+    .ref-list-status.pending {
+      background: rgba(245,158,11,0.15); color: var(--gold);
+    }
+    .ref-progress-wrap {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .ref-progress-bar {
+      flex: 1; height: 4px; background: rgba(255,255,255,0.06);
+      border-radius: 4px; overflow: hidden;
+    }
+    .ref-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--purple-dark), var(--purple));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    .ref-progress-fill.done {
+      background: linear-gradient(90deg, #059669, var(--green));
+    }
+    .ref-progress-label {
+      font-size: 10px; color: var(--text-muted); font-weight: 600;
+      flex-shrink: 0; white-space: nowrap;
+    }
+    .ref-list-empty {
+      text-align: center; padding: 20px;
+      color: var(--text-muted); font-size: 13px;
+    }
+
+    /* ════════════════════════════════════════════════
+       WITHDRAWAL SYSTEM — NEW STYLES
+    ════════════════════════════════════════════════ */
+    .wd-min-badge {
+      font-size: 11px; font-weight: 700;
+      background: rgba(245,158,11,0.15); color: var(--gold);
+      border: 1px solid rgba(245,158,11,0.3);
+      padding: 3px 10px; border-radius: 20px;
+    }
+    .wd-balance-row {
+      display: flex; align-items: center; justify-content: space-around;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px 12px; margin-bottom: 8px;
+    }
+    .wd-balance-item { text-align: center; flex: 1; }
+    .wd-balance-label {
+      font-size: 10px; color: var(--text-muted);
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .wd-balance-val {
+      font-size: 18px; font-weight: 800;
+    }
+    .wd-balance-val.green  { color: var(--green); }
+    .wd-balance-val.gold   { color: var(--gold-light); }
+    .wd-balance-val.cyan   { color: var(--cyan); }
+    .wd-balance-divider {
+      width: 1px; height: 36px; background: var(--border);
+    }
+    .wd-rate-note {
+      font-size: 11px; color: var(--text-muted); text-align: center;
+      margin-bottom: 14px; padding: 6px;
+      background: rgba(255,255,255,0.02); border-radius: 6px;
+    }
+
+    /* Payment method tabs */
+    .wd-method-tabs {
+      display: flex; gap: 6px; margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .wd-method-tab {
+      flex: 1; min-width: 60px;
+      padding: 8px 6px; font-size: 12px; font-weight: 700;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text-muted); cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+    .wd-method-tab:hover {
+      background: rgba(139,92,246,0.08);
+      border-color: rgba(139,92,246,0.2); color: var(--text-primary);
+    }
+    .wd-method-tab.active {
+      background: linear-gradient(135deg, rgba(139,92,246,0.25), rgba(99,102,241,0.15));
+      border-color: var(--purple); color: var(--purple-light);
+    }
+
+    /* Payment field groups */
+    .wd-field-group { margin-bottom: 10px; }
+    .wd-label {
+      display: block; font-size: 11px; font-weight: 700;
+      color: var(--text-secondary); margin-bottom: 5px;
+    }
+    .wd-required { color: var(--red); }
+    .wd-hint {
+      font-size: 10px; color: var(--text-muted); margin-top: 4px;
+    }
+
+    /* Amount + Preview row */
+    .wd-amount-row {
+      display: flex; gap: 10px; align-items: flex-end; margin-bottom: 12px;
+    }
+    .wd-preview {
+      text-align: center;
+      background: rgba(139,92,246,0.1);
+      border: 1px solid rgba(139,92,246,0.25);
+      border-radius: 10px; padding: 10px 14px;
+      min-width: 90px; flex-shrink: 0;
+    }
+    .wd-preview-label {
+      font-size: 9px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .wd-preview-value {
+      font-size: 20px; font-weight: 900;
+      background: linear-gradient(135deg, var(--gold), var(--purple-light));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .wd-preview-sub {
+      font-size: 10px; color: var(--text-muted);
+    }
+
+    /* History */
+    .wd-history-section { margin-top: 16px; }
+    .wd-history-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .wd-history-header > span {
+      font-size: 12px; font-weight: 700; color: var(--text-secondary);
+    }
+    .wd-filter-row { display: flex; gap: 4px; flex-wrap: wrap; }
+    .wd-filter-btn {
+      font-size: 10px; font-weight: 700; padding: 3px 9px;
+      border-radius: 10px; border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03); color: var(--text-muted);
+      cursor: pointer; font-family: 'Outfit', sans-serif;
+      transition: var(--transition);
+    }
+    .wd-filter-btn.active {
+      background: rgba(139,92,246,0.18); border-color: var(--purple);
+      color: var(--purple-light);
+    }
+    .wd-history-list { display: flex; flex-direction: column; gap: 8px; }
+    .wd-history-item {
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border); border-radius: 12px;
+      transition: var(--transition);
+    }
+    .wd-history-item:hover { background: rgba(255,255,255,0.05); }
+    .wd-history-top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .wd-history-amount {
+      font-size: 16px; font-weight: 800; color: var(--gold-light);
+    }
+    .wd-history-status {
+      font-size: 10px; font-weight: 700; padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .wd-history-status.pending    { background: rgba(245,158,11,0.15); color: var(--gold); }
+    .wd-history-status.processing { background: rgba(99,102,241,0.15); color: #818cf8; }
+    .wd-history-status.approved   { background: rgba(16,185,129,0.15); color: var(--green); }
+    .wd-history-status.rejected   { background: rgba(239,68,68,0.15);  color: var(--red); }
+    .wd-history-status.cancelled  { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+    .wd-history-meta {
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: var(--text-muted);
+    }
+    .wd-history-note {
+      font-size: 11px; color: var(--red); margin-top: 4px;
+      font-style: italic;
+    }
+    .wd-history-cancel {
+      font-size: 10px; font-weight: 700; color: var(--red);
+      background: none; border: none; cursor: pointer;
+      font-family: 'Outfit', sans-serif; padding: 0;
+      margin-top: 6px; transition: var(--transition);
+    }
+    .wd-history-cancel:hover { text-decoration: underline; }
+    .wd-history-empty {
+      text-align: center; padding: 24px;
+      color: var(--text-muted); font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Background Orbs -->
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+<div class="bg-orb bg-orb-3"></div>
+
+<!-- Sidebar Overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- Toast -->
+<div id="toast">
+  <span id="toastIcon">✅</span>
+  <span id="toastMsg">Copied!</span>
+</div>
+
+<div class="layout">
+  <!-- ════════════ SIDEBAR ════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🪙</div>
+      <span class="logo-text">TapEarn</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+
+      <a class="nav-item active" id="nav-dashboard" onclick="switchPage('dashboard')">
+        <span class="nav-icon">⚡</span>
+        Dashboard
+      </a>
+      <a class="nav-item" id="nav-tap" onclick="switchPage('tap')">
+        <span class="nav-icon">👆</span>
+        Tap to Earn
+      </a>
+      <a class="nav-item" id="nav-leaderboard" onclick="switchPage('leaderboard')">
+        <span class="nav-icon">🏆</span>
+        Leaderboard
+      </a>
+
+      <div class="nav-section-label">Rewards</div>
+
+      <a class="nav-item" id="nav-daily" onclick="switchPage('daily')">
+        <span class="nav-icon">🎁</span>
+        Daily Rewards
+        <span class="nav-badge">!</span>
+      </a>
+      <a class="nav-item" id="nav-tasks" onclick="switchPage('tasks')">
+        <span class="nav-icon">✅</span>
+        Tasks
+      </a>
+      <a class="nav-item" id="nav-referral" onclick="switchPage('referral')">
+        <span class="nav-icon">👥</span>
+        Referral
+      </a>
+
+      <div class="nav-section-label">Finance</div>
+
+      <a class="nav-item" id="nav-withdraw" onclick="switchPage('withdraw')">
+        <span class="nav-icon">💸</span>
+        Withdraw
+      </a>
+      <a class="nav-item" id="nav-history" onclick="switchPage('history')">
+        <span class="nav-icon">📜</span>
+        History
+      </a>
+    </nav>
+
+    <div class="sidebar-user">
+      <div class="user-avatar">YS</div>
+      <div class="user-info">
+        <div class="user-name">YashSharma</div>
+        <div class="user-level">⭐ Level 12</div>
+      </div>
+      <span style="color:var(--text-muted);font-size:14px;">⚙</span>
+    </div>
+  </aside>
+
+  <!-- ════════════ MAIN ════════════ -->
+  <div class="main">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="topbar-hamburger" onclick="toggleSidebar()">☰</div>
+      <div class="topbar-greeting">
+        <div class="topbar-title">Welcome back, Yash 👋</div>
+        <div class="topbar-subtitle">Thursday, 10 July 2026 · Dashboard</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="topbar-btn" onclick="showToast('🔔','No new notifications')">
+          🔔
+          <div class="notif-dot"></div>
+        </div>
+        <div class="topbar-btn" onclick="showToast('⚙️','Settings coming soon')">⚙️</div>
+        <div class="topbar-avatar">YS</div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- ── HERO SECTION ── -->
+      <div class="hero-section">
+
+        <!-- Profile Card -->
+        <div class="card profile-card">
+          <div class="profile-top">
+            <div class="profile-avatar-wrap">
+              <div class="profile-avatar">YS</div>
+              <div class="profile-online"></div>
+            </div>
+            <div>
+              <div class="profile-name">YashSharma</div>
+              <div class="profile-handle">@yash_tap · Joined Jan 2026</div>
+              <div class="level-badge">⭐ Level 12 · Tapper Pro</div>
+            </div>
+          </div>
+          <div class="profile-stats">
+            <div class="profile-stat">
+              <div class="profile-stat-value">48.2K</div>
+              <div class="profile-stat-label">Total Taps</div>
+            </div>
+            <div class="profile-stat">
+              <div class="profile-stat-value">14</div>
+              <div class="profile-stat-label">Referrals</div>
+            </div>
+            <div class="profile-stat">
+              <div class="profile-stat-value">7🔥</div>
+              <div class="profile-stat-label">Streak</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Coin Balance Card -->
+        <div class="card coin-card">
+          <div>
+            <div class="coin-label">💰 Total Coins</div>
+            <div class="coin-amount" id="coinDisplay">128,450</div>
+            <div class="coin-usd">≈ $128.45 USD</div>
+            <div class="coin-change">
+              ▲ +2,340 today
+            </div>
+          </div>
+          <div class="coin-mini-stats">
+            <div class="coin-mini-stat">
+              <div class="coin-mini-label">Available</div>
+              <div class="coin-mini-value" id="availCoins">98,450</div>
+            </div>
+            <div class="coin-mini-stat">
+              <div class="coin-mini-label">Pending</div>
+              <div class="coin-mini-value" style="color:var(--cyan)">30,000</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Stats Card -->
+        <div class="card stats-card">
+          <div class="stats-card-title">Quick Stats</div>
+          <div class="stat-row">
+            <div class="stat-left">
+              <div class="stat-icon-wrap stat-icon-gold">🪙</div>
+              <div>
+                <div class="stat-name">Today's Earnings</div>
+              </div>
+            </div>
+            <div class="stat-value" style="color:var(--gold-light)">+2,340</div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-left">
+              <div class="stat-icon-wrap stat-icon-purple">⚡</div>
+              <div>
+                <div class="stat-name">Taps Today</div>
+              </div>
+            </div>
+            <div class="stat-value" style="color:var(--purple-light)">1,248</div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-left">
+              <div class="stat-icon-wrap stat-icon-green">👥</div>
+              <div>
+                <div class="stat-name">Referral Bonus</div>
+              </div>
+            </div>
+            <div class="stat-value" style="color:var(--green)">+700</div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-left">
+              <div class="stat-icon-wrap stat-icon-cyan">🏆</div>
+              <div>
+                <div class="stat-name">Global Rank</div>
+              </div>
+            </div>
+            <div class="stat-value" style="color:var(--cyan)">#47</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAP SECTION ── -->
+      <div class="tap-section">
+
+        <!-- Tap Button Card -->
+        <div class="card tap-card">
+          <div class="tap-title">⚡ Tap to Earn</div>
+          <div class="tap-earned-today" id="tapEarnedDisplay">+0 coins today</div>
+
+          <div class="tap-btn-wrap">
+            <div class="tap-ring"></div>
+            <div class="tap-ring tap-ring-2"></div>
+            <div class="tap-ring tap-ring-3"></div>
+            <div class="tap-pulse-outer"></div>
+            <div class="combo-badge" id="comboBadge">🔥 COMBO x5</div>
+            <button id="tapBtn" onclick="handleTap(event)">
+              <span class="tap-btn-icon">👆</span>
+              <span class="tap-btn-label">TAP</span>
+              <span class="tap-btn-power" id="tapPowerLabel">+1 per tap</span>
+            </button>
+          </div>
+
+          <!-- Request sync indicator -->
+          <div class="req-indicator">
+            <div class="req-dot" id="reqDot"></div>
+            <span id="reqLabel">Ready</span>
+          </div>
+
+          <!-- Cheat detection warning -->
+          <div class="cheat-warning" id="cheatWarning">
+            ⚠️ Unusual tapping pattern detected. Rewards may be reduced.
+          </div>
+
+          <!-- Energy Bar -->
+          <div class="energy-section">
+            <div class="energy-header">
+              <div class="energy-label">⚡ Energy</div>
+              <div class="energy-value" id="energyText">75 / 100</div>
+            </div>
+            <div class="energy-bar-track">
+              <div id="energyFill" style="width:75%"></div>
+            </div>
+            <div class="energy-refill">🔄 Refills +1 every 30 seconds</div>
+            <!-- Lifetime tap progress -->
+            <div class="lifetime-wrap">
+              <div class="lifetime-header">
+                <span>🏅 Lifetime Taps</span>
+                <span id="lifetimeText">48,200 / 50,000</span>
+              </div>
+              <div class="lifetime-bar-track">
+                <div class="lifetime-bar-fill" id="lifetimeFill" style="width:96.4%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tap Side Stats -->
+        <div class="tap-side">
+          <!-- Tap Mini Stats -->
+          <div class="card" style="padding:18px;">
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:12px;">Session Stats</div>
+            <div class="tap-stats-grid">
+              <div class="tap-stat-mini">
+                <div class="tap-stat-mini-label">Coins Earned</div>
+                <div class="tap-stat-mini-value gold" id="sessionCoins">0</div>
+              </div>
+              <div class="tap-stat-mini">
+                <div class="tap-stat-mini-label">Taps Done</div>
+                <div class="tap-stat-mini-value purple" id="sessionTaps">0</div>
+              </div>
+              <div class="tap-stat-mini">
+                <div class="tap-stat-mini-label">Tap Power</div>
+                <div class="tap-stat-mini-value green">×1</div>
+              </div>
+              <div class="tap-stat-mini">
+                <div class="tap-stat-mini-label">Energy Left</div>
+                <div class="tap-stat-mini-value cyan" id="energyLeft">75</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Energy Boost -->
+          <div class="card" style="padding:18px;">
+            <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:12px;">⚡ Boosts</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div onclick="showToast('🚀','Energy fully restored!')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.25);border-radius:10px;cursor:pointer;transition:var(--transition);" onmouseover="this.style.background='rgba(139,92,246,0.18)'" onmouseout="this.style.background='rgba(139,92,246,0.1)'">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:18px;">⚡</span>
+                  <div>
+                    <div style="font-size:12px;font-weight:600;">Full Refill</div>
+                    <div style="font-size:10px;color:var(--text-muted);">Restore 100 energy</div>
+                  </div>
+                </div>
+                <div style="font-size:12px;font-weight:700;color:var(--purple-light);">500 🪙</div>
+              </div>
+              <div onclick="showToast('💥','2x Tap Power active for 5 mins!')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);border-radius:10px;cursor:pointer;transition:var(--transition);" onmouseover="this.style.background='rgba(245,158,11,0.18)'" onmouseout="this.style.background='rgba(245,158,11,0.1)'">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:18px;">💥</span>
+                  <div>
+                    <div style="font-size:12px;font-weight:600;">2× Tap Power</div>
+                    <div style="font-size:10px;color:var(--text-muted);">5 minutes boost</div>
+                  </div>
+                </div>
+                <div style="font-size:12px;font-weight:700;color:var(--gold-light);">1,000 🪙</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BOTTOM GRID ── -->
+      <div class="bottom-grid">
+
+        <!-- Daily Reward Card -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-title-icon">🎁</span>
+              Daily Rewards
+            </div>
+            <span style="font-size:11px;color:var(--green);font-weight:700;">Active</span>
+          </div>
+          <div class="card-body">
+            <div class="daily-days" id="dailyDays"></div>
+
+            <div class="daily-streak">
+              <span class="streak-icon">🔥</span>
+              <div class="streak-text">
+                <div class="streak-label">Current Streak</div>
+                <div class="streak-value">7 Days — Max Bonus!</div>
+              </div>
+              <span style="font-size:20px;">🎊</span>
+            </div>
+
+            <button class="btn-claim" id="claimBtn" onclick="claimDailyReward()">
+              🎁 Claim 500 Coins (Day 7)
+            </button>
+          </div>
+        </div>
+
+        <!-- Referral Card (UPGRADED) -->
+        <div class="card referral-card" id="referralCard">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-title-icon">👥</span>
+              Referral Program
+            </div>
+            <span class="ref-badge" id="refBadgeCount">14 Referred</span>
+          </div>
+          <div class="card-body">
+
+            <!-- Stats Row -->
+            <div class="referral-stats">
+              <div class="ref-stat">
+                <div class="ref-stat-value" id="refTotal">14</div>
+                <div class="ref-stat-label">Total Invited</div>
+              </div>
+              <div class="ref-stat">
+                <div class="ref-stat-value" style="color:var(--green)" id="refActivated">9</div>
+                <div class="ref-stat-label">Activated ✅</div>
+              </div>
+              <div class="ref-stat">
+                <div class="ref-stat-value" style="color:var(--gold-light)" id="refCoins">700</div>
+                <div class="ref-stat-label">Earned 🪙</div>
+              </div>
+              <div class="ref-stat">
+                <div class="ref-stat-value" style="color:var(--cyan)" id="refPending">5</div>
+                <div class="ref-stat-label">Pending ⏳</div>
+              </div>
+            </div>
+
+            <!-- My Referral Code -->
+            <div class="ref-code-section">
+              <div class="ref-code-label">🔑 Your Referral Code</div>
+              <div class="ref-code-display" id="refCodeDisplay">YASH8X7K</div>
+            </div>
+
+            <!-- Referral Link Copy -->
+            <div class="referral-link-wrap">
+              <input class="referral-link-input" type="text" readonly id="refLink"
+                value="tapearn.app/r/YASH8X7K" />
+              <button class="btn-copy" onclick="copyReferral()" id="copyBtn">📋 Copy</button>
+            </div>
+
+            <!-- Share Buttons -->
+            <div class="ref-share-row">
+              <button class="ref-share-btn" onclick="shareWhatsApp()" title="WhatsApp">
+                <span>📱</span> WhatsApp
+              </button>
+              <button class="ref-share-btn" onclick="shareTwitter()" title="Twitter">
+                <span>🐦</span> Twitter
+              </button>
+              <button class="ref-share-btn" onclick="shareNative()" title="More">
+                <span>📤</span> Share
+              </button>
+            </div>
+
+            <!-- Validate a Code -->
+            <div class="ref-validate-wrap">
+              <div class="ref-validate-label">🔍 Validate a referral code</div>
+              <div class="ref-validate-row">
+                <input class="ref-validate-input" type="text" id="validateInput"
+                  placeholder="Enter code e.g. JOHN4X2Y" maxlength="12" />
+                <button class="ref-validate-btn" onclick="validateReferralCode()">Check</button>
+              </div>
+              <div class="ref-validate-result" id="validateResult"></div>
+            </div>
+
+            <!-- How It Works (tier system) -->
+            <div class="ref-tier-list">
+              <div class="ref-tier-title">💡 How It Works</div>
+              <div class="ref-tier">
+                <div class="ref-tier-step">1</div>
+                <div class="ref-tier-body">
+                  <div class="ref-tier-name">Friend joins via your link</div>
+                  <div class="ref-tier-sub">They get +20 🪙 welcome bonus instantly</div>
+                </div>
+                <span class="ref-tier-earn">+20 🪙<br><small>them</small></span>
+              </div>
+              <div class="ref-tier">
+                <div class="ref-tier-step">2</div>
+                <div class="ref-tier-body">
+                  <div class="ref-tier-name">Friend reaches 100 taps</div>
+                  <div class="ref-tier-sub">Verified as a real user — no fakes!</div>
+                </div>
+                <span class="ref-tier-earn" style="color:var(--gold-light)">+50 🪙<br><small>you</small></span>
+              </div>
+            </div>
+
+            <!-- Recent Referrals List -->
+            <div class="ref-list-section">
+              <div class="ref-list-header">
+                <span>👥 Recent Referrals</span>
+                <button class="ref-view-all" onclick="loadReferralList()">Refresh ↻</button>
+              </div>
+              <div id="referralList" class="ref-list"></div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Withdrawal Card (UPGRADED) -->
+        <div class="card" id="withdrawalCard">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-title-icon">💸</span>
+              Withdraw Coins
+            </div>
+            <span class="wd-min-badge">Min 1,000 🪙</span>
+          </div>
+          <div class="card-body">
+
+            <!-- Balance Row -->
+            <div class="wd-balance-row">
+              <div class="wd-balance-item">
+                <div class="wd-balance-label">Available</div>
+                <div class="wd-balance-val green" id="wdAvailable">98,450</div>
+              </div>
+              <div class="wd-balance-divider"></div>
+              <div class="wd-balance-item">
+                <div class="wd-balance-label">Pending</div>
+                <div class="wd-balance-val gold" id="wdPending">0</div>
+              </div>
+              <div class="wd-balance-divider"></div>
+              <div class="wd-balance-item">
+                <div class="wd-balance-label">USD Value</div>
+                <div class="wd-balance-val cyan" id="wdUsd">$98.45</div>
+              </div>
+            </div>
+            <div class="wd-rate-note">💱 Rate: 1,000 coins = $1.00 USD &bull; Conversion: $0.001 per coin</div>
+
+            <!-- Payment Method Tabs -->
+            <div class="wd-method-tabs" id="wdMethodTabs">
+              <button class="wd-method-tab active" data-method="upi"          onclick="selectMethod('upi')">🇮🇳 UPI</button>
+              <button class="wd-method-tab"         data-method="paypal"       onclick="selectMethod('paypal')">🅿️ PayPal</button>
+              <button class="wd-method-tab"         data-method="bank_transfer" onclick="selectMethod('bank_transfer')">🏦 Bank</button>
+              <button class="wd-method-tab"         data-method="crypto"       onclick="selectMethod('crypto')">₿ Crypto</button>
+            </div>
+
+            <!-- Dynamic Payment Fields -->
+            <div id="wdFields">
+              <!-- UPI -->
+              <div class="wd-field-group" id="fields-upi">
+                <label class="wd-label">UPI ID <span class="wd-required">*</span></label>
+                <input class="form-input" id="upiId" placeholder="yourname@upibank" autocomplete="off" />
+                <div class="wd-hint">e.g. john@okicici, jane@ybl</div>
+              </div>
+              <!-- PayPal -->
+              <div class="wd-field-group" id="fields-paypal" style="display:none">
+                <label class="wd-label">PayPal Email <span class="wd-required">*</span></label>
+                <input class="form-input" id="paypalEmail" type="email" placeholder="you@email.com" />
+              </div>
+              <!-- Bank Transfer -->
+              <div class="wd-field-group" id="fields-bank_transfer" style="display:none">
+                <label class="wd-label">Bank Name <span class="wd-required">*</span></label>
+                <input class="form-input" id="bankName" placeholder="e.g. State Bank of India" />
+                <label class="wd-label" style="margin-top:8px">Account Number <span class="wd-required">*</span></label>
+                <input class="form-input" id="accountNumber" placeholder="Account number" type="password" autocomplete="off" />
+                <label class="wd-label" style="margin-top:8px">IFSC Code <span class="wd-required">*</span></label>
+                <input class="form-input" id="ifscCode" placeholder="SBIN0001234" style="text-transform:uppercase" maxlength="11" />
+                <label class="wd-label" style="margin-top:8px">Account Holder Name <span class="wd-required">*</span></label>
+                <input class="form-input" id="accountHolderName" placeholder="Full name as on bank account" />
+              </div>
+              <!-- Crypto -->
+              <div class="wd-field-group" id="fields-crypto" style="display:none">
+                <label class="wd-label">Currency <span class="wd-required">*</span></label>
+                <select class="form-select" id="cryptoCurrency">
+                  <option value="USDT">🔵 USDT (Tether — TRC20/ERC20)</option>
+                  <option value="BTC">🟠 BTC (Bitcoin)</option>
+                  <option value="ETH">🔷 ETH (Ethereum)</option>
+                  <option value="BNB">🟡 BNB (Binance Smart Chain)</option>
+                </select>
+                <label class="wd-label" style="margin-top:8px">Wallet Address <span class="wd-required">*</span></label>
+                <input class="form-input" id="walletAddress" placeholder="0x... or T... wallet address" />
+                <div class="wd-hint">⚠️ Double-check your address. Crypto transfers are irreversible.</div>
+              </div>
+            </div>
+
+            <!-- Amount + Preview -->
+            <div class="wd-amount-row">
+              <div class="wd-field-group" style="flex:1;margin:0">
+                <label class="wd-label">Amount (Coins) <span class="wd-required">*</span></label>
+                <input class="form-input" type="number" id="withdrawAmount"
+                  placeholder="Min 1,000" min="1000" step="100"
+                  oninput="updateWdPreview()" />
+              </div>
+              <div class="wd-preview">
+                <div class="wd-preview-label">You receive</div>
+                <div class="wd-preview-value" id="wdPreviewVal">$0.00</div>
+                <div class="wd-preview-sub" id="wdPreviewUsd">USD</div>
+              </div>
+            </div>
+
+            <button class="btn-withdraw" id="wdSubmitBtn" onclick="submitWithdrawalReq()">
+              💸 Request Withdrawal
+            </button>
+            <div class="withdrawal-note">⏱ Processed in 1–3 business days • Admin approval required</div>
+
+            <!-- Withdrawal History -->
+            <div class="wd-history-section">
+              <div class="wd-history-header">
+                <span>📜 Withdrawal History</span>
+                <div class="wd-filter-row">
+                  <button class="wd-filter-btn active" id="fAll"      onclick="filterWdHistory('')">All</button>
+                  <button class="wd-filter-btn"         id="fPending"  onclick="filterWdHistory('pending')">Pending</button>
+                  <button class="wd-filter-btn"         id="fApproved" onclick="filterWdHistory('approved')">Approved</button>
+                  <button class="wd-filter-btn"         id="fRejected" onclick="filterWdHistory('rejected')">Rejected</button>
+                </div>
+              </div>
+              <div id="wdHistoryList" class="wd-history-list">
+                <!-- populated by JS -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+
+        <!-- Leaderboard Card -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-title-icon">🏆</span>
+              Leaderboard
+            </div>
+            <div style="display:flex;gap:6px;">
+              <span style="font-size:11px;padding:3px 8px;border-radius:6px;background:rgba(245,158,11,0.2);color:var(--gold);font-weight:700;cursor:pointer;" onclick="showToast('🏆','All-time leaderboard')">All-time</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="leaderboard-list" id="leaderboardList"></div>
+            <button class="view-full-lb" onclick="showToast('🏆','Full leaderboard coming soon')">View Full Leaderboard →</button>
+          </div>
+        </div>
+
+      </div><!-- end bottom-grid -->
+    </div><!-- end content -->
+  </div><!-- end main -->
+</div><!-- end layout -->
+
+<script>
+/* ════════════════════════════════════════════════
+   CONFIGURATION
+════════════════════════════════════════════════ */
+const API_BASE        = 'http://localhost:5000/api'
+const LIFETIME_MAX    = 50000
+const MAX_ENERGY      = 100
+const BATCH_FLUSH_MS  = 300     // send batch after 300ms of no new taps
+const MAX_BATCH_SIZE  = 10      // max taps per API request
+const ENERGY_REFILL_INTERVAL = 30000  // 30 seconds
+const MIN_TAP_INTERVAL_MS = 80  // UI-side rate limiter
+
+/* ════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════ */
+const state = {
+  coins:         128450,
+  availCoins:    98450,
+  energy:        75,
+  maxEnergy:     MAX_ENERGY,
+  sessionCoins:  0,
+  sessionTaps:   0,
+  tapPower:      1,
+  lifetimeTaps:  48200,
+  dailyClaimed:  false,
+  dailyDay:      7,
+  streak:        7,
+  // Tap batch buffer
+  tapBuffer:     0,
+  tapIntervals:  [],
+  lastTapTime:   0,
+  batchTimer:    null,
+  flushLocked:   false,
+  lastTapMs:     0,
+  // Session
+  sessionId:     generateSessionId(),
+  // Combo
+  comboCount:    0,
+  comboTimer:    null,
+  isFlagged:     false,
+}
+
+function generateSessionId() {
+  return 'sess_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,9)
+}
+
+/* ════════════════════════════════════════════════
+   DAILY REWARDS INIT
+════════════════════════════════════════════════ */
+const dailyData = [
+  {coins:50},{coins:75},{coins:100},{coins:150},{coins:200},{coins:250},{coins:500},
+]
+const dayIcons = ['🌱','🌿','⚡','💫','🔥','🌟','🎊']
+
+function renderDailyDays() {
+  const container = document.getElementById('dailyDays')
+  container.innerHTML = ''
+  dailyData.forEach((d, i) => {
+    const div = document.createElement('div')
+    const dayNum = i + 1
+    let cls = 'daily-day'
+    if (dayNum < state.dailyDay) cls += ' claimed'
+    if (dayNum === state.dailyDay) cls += ' today'
+    div.className = cls
+    div.innerHTML = `
+      <span class="daily-day-icon">${dayNum < state.dailyDay ? '✅' : dayIcons[i]}</span>
+      <span class="daily-day-coins">${d.coins >= 100 ? (d.coins/1000*1).toFixed(0)+'00' : d.coins}🪙</span>
+      <span class="daily-day-num">D${dayNum}</span>
+    `
+    container.appendChild(div)
+  })
+}
+renderDailyDays()
+
+/* ════════════════════════════════════════════════
+   LEADERBOARD INIT
+════════════════════════════════════════════════ */
+const lbData = [
+  {name:'CryptoKing99',coins:420880,taps:'420K',avatar:'👑',color:'#7c3aed',rank:1,change:0},
+  {name:'TapMaster_X', coins:385420,taps:'385K',avatar:'🦁',color:'#d97706',rank:2,change:1},
+  {name:'ClickQueen',  coins:312500,taps:'312K',avatar:'👸',color:'#0891b2',rank:3,change:-1},
+  {name:'ZeroToHero',  coins:278900,taps:'278K',avatar:'🚀',color:'#059669',rank:4,change:2},
+  {name:'FastFingers', coins:241300,taps:'241K',avatar:'⚡',color:'#dc2626',rank:5,change:0},
+  {name:'YashSharma',  coins:128450,taps:'48K', avatar:'😎',color:'#8b5cf6',rank:47,change:3,me:true},
+]
+
+function renderLeaderboard() {
+  const container = document.getElementById('leaderboardList')
+  container.innerHTML = ''
+  lbData.forEach(user => {
+    const item = document.createElement('div')
+    item.className = 'lb-item' + (user.me ? ' me' : '')
+    const rankClass = user.rank===1?'gold':user.rank===2?'silver':user.rank===3?'bronze':'normal'
+    const rankIcon  = user.rank===1?'🥇':user.rank===2?'🥈':user.rank===3?'🥉':('#'+user.rank)
+    const changeIcon = user.change>0?`<span class="lb-change up">▲${user.change}</span>`
+                     : user.change<0?`<span class="lb-change down">▼${Math.abs(user.change)}</span>`
+                     : `<span class="lb-change same">—</span>`
+    item.innerHTML = `
+      <div class="lb-rank ${rankClass}">${rankIcon}</div>
+      <div class="lb-avatar" style="background:${user.color}20;border:1px solid ${user.color}40;">${user.avatar}</div>
+      <div class="lb-info">
+        <div class="lb-name">${user.name} ${user.me?'<span class="lb-me-label">YOU</span>':''}</div>
+        <div class="lb-taps">${user.taps} taps</div>
+      </div>
+      <div><div class="lb-coins">${(user.coins/1000).toFixed(1)}K</div>${changeIcon}</div>
+    `
+    container.appendChild(item)
+  })
+}
+renderLeaderboard()
+
+/* ════════════════════════════════════════════════
+   MAIN TAP HANDLER
+════════════════════════════════════════════════ */
+function handleTap(e) {
+  const now = Date.now()
+
+  // ── UI-level rate guard (80ms minimum between taps) ───
+  if (now - state.lastTapMs < MIN_TAP_INTERVAL_MS) return
+  state.lastTapMs = now
+
+  // ── Energy guard ──────────────────────────────────────
+  if (state.energy <= 0) {
+    shakeEnergyBar()
+    showToast('⚡', 'No energy! Refilling in 30s...')
+    return
+  }
+
+  // ── Lifetime tap limit ────────────────────────────────
+  if (state.lifetimeTaps >= LIFETIME_MAX) {
+    showToast('🏅', 'You reached the 50,000 tap limit!')
+    document.getElementById('tapBtn').classList.add('no-energy')
+    return
+  }
+
+  // ── Record interval for anti-cheat ─────────────────────
+  if (state.lastTapTime > 0) {
+    const interval = now - state.lastTapTime
+    state.tapIntervals.push(interval)
+    if (state.tapIntervals.length > MAX_BATCH_SIZE) state.tapIntervals.shift()
+  }
+  state.lastTapTime = now
+
+  // ── Optimistic local update ────────────────────────────
+  state.energy        = Math.max(0, state.energy - 1)
+  state.tapBuffer    += 1
+  state.sessionTaps  += 1
+  state.lifetimeTaps += 1
+  const earned = state.tapPower
+  state.coins        += earned
+  state.availCoins   += earned
+  state.sessionCoins += earned
+
+  // ── Update all UI ─────────────────────────────────────
+  updateEnergyUI()
+  updateCoinUI()
+  updateSessionUI()
+  updateLifetimeUI()
+  animateTapButton()
+  spawnFloatLabel(e.clientX, e.clientY, '+' + earned)
+  spawnCoinParticle(e.clientX, e.clientY)
+  updateCombo()
+
+  // ── Flush buffer if full ──────────────────────────────
+  if (state.tapBuffer >= MAX_BATCH_SIZE) {
+    flushTapBuffer()
+    return
+  }
+
+  // ── Schedule delayed flush ────────────────────────────
+  clearTimeout(state.batchTimer)
+  state.batchTimer = setTimeout(flushTapBuffer, BATCH_FLUSH_MS)
+}
+
+/* ════════════════════════════════════════════════
+   FLUSH TAP BUFFER — sends batch to backend
+════════════════════════════════════════════════ */
+async function flushTapBuffer() {
+  clearTimeout(state.batchTimer)
+  if (state.tapBuffer === 0) return
+  if (state.flushLocked) {
+    // Another request in flight — reschedule
+    state.batchTimer = setTimeout(flushTapBuffer, 150)
+    return
+  }
+
+  const batchCount = state.tapBuffer
+  const intervals  = [...state.tapIntervals]
+  const clientTs   = new Date().toISOString()
+
+  // Reset buffer immediately (optimistic)
+  state.tapBuffer    = 0
+  state.tapIntervals = []
+  state.flushLocked  = true
+  setRequestState('pending', 'Syncing...')
+
+  try {
+    const token = getAuthToken()
+    const res   = await fetch(`${API_BASE}/tap`, {
+      method:  'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({
+        tapCount:        batchCount,
+        sessionId:       state.sessionId,
+        clientTimestamp: clientTs,
+        tapIntervals:    intervals,
+        energyAtClient:  state.energy,
+      }),
+    })
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      handleTapError(res.status, data, batchCount)
+      return
+    }
+
+    // ── Reconcile server truth ────────────────────────────
+    reconcileServerResponse(data.data)
+    setRequestState('ok', 'Synced ✓')
+
+    if (data.data?.isSuspicious) {
+      state.isFlagged = true
+      const warn = document.getElementById('cheatWarning')
+      warn.classList.add('show')
+      setTimeout(() => warn.classList.remove('show'), 5000)
+    }
+
+  } catch (err) {
+    // Network error — keep optimistic state, warn
+    console.warn('[TapSync] Network error:', err.message)
+    setRequestState('error', 'Offline — retrying...')
+    setTimeout(() => setRequestState('ok', 'Ready'), 3000)
+  } finally {
+    state.flushLocked = false
+  }
+}
+
+/* ════════════════════════════════════════════════
+   SERVER RECONCILE — corrects drift
+════════════════════════════════════════════════ */
+function reconcileServerResponse(d) {
+  if (!d) return
+  if (typeof d.newEnergy === 'number') { state.energy = d.newEnergy; updateEnergyUI() }
+  if (typeof d.newTotalCoins === 'number') { state.coins = d.newTotalCoins; updateCoinUI() }
+  if (typeof d.lifetimeTapsRemaining === 'number') {
+    state.lifetimeTaps = LIFETIME_MAX - d.lifetimeTapsRemaining
+    updateLifetimeUI()
+  }
+}
+
+/* ════════════════════════════════════════════════
+   TAP ERROR — rollback optimistic update
+════════════════════════════════════════════════ */
+function handleTapError(status, data, batchCount) {
+  const rollback = batchCount * state.tapPower
+  state.coins        = Math.max(0, state.coins - rollback)
+  state.availCoins   = Math.max(0, state.availCoins - rollback)
+  state.sessionCoins = Math.max(0, state.sessionCoins - rollback)
+  state.sessionTaps  = Math.max(0, state.sessionTaps - batchCount)
+  state.lifetimeTaps = Math.max(0, state.lifetimeTaps - batchCount)
+  state.energy       = Math.min(state.maxEnergy, state.energy + batchCount)
+  updateEnergyUI(); updateCoinUI(); updateSessionUI(); updateLifetimeUI()
+
+  const btn = document.getElementById('tapBtn')
+  if (status === 429) {
+    setRequestState('error', '🚫 Bot detected')
+    document.getElementById('cheatWarning').classList.add('show')
+    showToast('🚫', data.message || 'Auto-clicking detected! Tap was blocked.')
+    btn.classList.add('locked')
+    setTimeout(() => {
+      btn.classList.remove('locked')
+      document.getElementById('cheatWarning').classList.remove('show')
+      setRequestState('ok', 'Ready')
+    }, 10000)
+  } else if (status === 403) {
+    setRequestState('error', '🏅 Limit reached')
+    showToast('🏅', data.message || 'Tap limit reached!')
+  } else if (status === 400) {
+    setRequestState('error', '⚡ No energy')
+    showToast('⚡', data.message || 'Not enough energy!')
+  } else if (status === 401) {
+    setRequestState('error', '🔒 Not logged in')
+    showToast('🔒', 'Please log in to save your taps.')
+    setTimeout(() => setRequestState('ok', 'Ready'), 3000)
+  } else {
+    setRequestState('error', 'Sync failed')
+    showToast('❌', 'Sync failed. Taps not saved.')
+    setTimeout(() => setRequestState('ok', 'Ready'), 3000)
+  }
+}
+
+/* ════════════════════════════════════════════════
+   REQUEST STATE INDICATOR
+════════════════════════════════════════════════ */
+function setRequestState(type, label) {
+  const dot = document.getElementById('reqDot')
+  const lbl = document.getElementById('reqLabel')
+  dot.className = 'req-dot' + (type==='pending' ? ' pending' : type==='error' ? ' error' : '')
+  if (lbl) lbl.textContent = label
+}
+
+function getAuthToken() {
+  try { return localStorage.getItem('accessToken') || '' } catch { return '' }
+}
+
+/* ════════════════════════════════════════════════
+   UI UPDATERS
+════════════════════════════════════════════════ */
+function updateEnergyUI() {
+  const pct = (state.energy / state.maxEnergy) * 100
+  document.getElementById('energyFill').style.width = pct + '%'
+  document.getElementById('energyText').textContent = `${state.energy} / ${state.maxEnergy}`
+  document.getElementById('energyLeft').textContent = state.energy
+  const fill = document.getElementById('energyFill')
+  if (pct < 20)       fill.style.background = 'linear-gradient(90deg,#dc2626,#ef4444)'
+  else if (pct < 50)  fill.style.background = 'linear-gradient(90deg,#d97706,#f59e0b)'
+  else                fill.style.background = 'linear-gradient(90deg,var(--purple-dark),var(--purple),var(--purple-light))'
+  const btn = document.getElementById('tapBtn')
+  if (state.energy <= 0 || state.lifetimeTaps >= LIFETIME_MAX) btn.classList.add('no-energy')
+  else btn.classList.remove('no-energy')
+}
+
+function updateCoinUI() {
+  const fmt = n => n>=1000000?(n/1000000).toFixed(2)+'M':n>=1000?n.toLocaleString():String(n)
+  document.getElementById('coinDisplay').textContent = fmt(state.coins)
+  document.getElementById('availCoins').textContent  = fmt(state.availCoins)
+}
+
+function updateSessionUI() {
+  document.getElementById('sessionCoins').textContent = state.sessionCoins.toLocaleString()
+  document.getElementById('sessionTaps').textContent  = state.sessionTaps.toLocaleString()
+  document.getElementById('tapEarnedDisplay').textContent = `+${state.sessionCoins.toLocaleString()} coins today`
+}
+
+function updateLifetimeUI() {
+  const pct  = Math.min(100, (state.lifetimeTaps / LIFETIME_MAX) * 100)
+  const lft  = document.getElementById('lifetimeText')
+  const fill = document.getElementById('lifetimeFill')
+  if (lft)  lft.textContent  = `${state.lifetimeTaps.toLocaleString()} / ${LIFETIME_MAX.toLocaleString()}`
+  if (fill) fill.style.width = pct + '%'
+  if (fill && pct >= 95) fill.style.background = 'linear-gradient(90deg,#dc2626,#ef4444)'
+}
+
+/* ════════════════════════════════════════════════
+   TAP BUTTON ANIMATION
+════════════════════════════════════════════════ */
+function animateTapButton() {
+  const btn = document.getElementById('tapBtn')
+  btn.classList.add('tapping')
+  setTimeout(() => btn.classList.remove('tapping'), 80)
+}
+
+/* ════════════════════════════════════════════════
+   COMBO SYSTEM
+════════════════════════════════════════════════ */
+function updateCombo() {
+  state.comboCount++
+  const badge = document.getElementById('comboBadge')
+  if (!badge) return
+  if (state.comboCount >= 5) {
+    badge.textContent = `🔥 ${state.comboCount}x COMBO!`
+    badge.classList.add('show')
+  }
+  clearTimeout(state.comboTimer)
+  state.comboTimer = setTimeout(() => {
+    state.comboCount = 0
+    badge.classList.remove('show')
+  }, 1200)
+}
+
+/* ════════════════════════════════════════════════
+   ENERGY AUTO-REFILL
+════════════════════════════════════════════════ */
+setInterval(() => {
+  if (state.energy < state.maxEnergy) {
+    state.energy = Math.min(state.maxEnergy, state.energy + 1)
+    updateEnergyUI()
+  }
+}, ENERGY_REFILL_INTERVAL)
+
+/* ════════════════════════════════════════════════
+   PARTICLES
+════════════════════════════════════════════════ */
+const COIN_ICONS = ['🪙','💰','⭐','✨','💛']
+
+function spawnCoinParticle(x, y) {
+  for (let i = 0; i < 2; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div')
+      el.className   = 'coin-particle'
+      el.textContent = COIN_ICONS[Math.floor(Math.random() * COIN_ICONS.length)]
+      el.style.left  = (x + (Math.random()-0.5)*60) + 'px'
+      el.style.top   = (y + (Math.random()-0.5)*20) + 'px'
+      document.body.appendChild(el)
+      setTimeout(() => el.remove(), 1000)
+    }, i * 80)
+  }
+}
+
+function spawnFloatLabel(x, y, text) {
+  const el = document.createElement('div')
+  el.className   = 'float-label'
+  el.textContent = text
+  el.style.left  = (x + (Math.random()-0.5)*30) + 'px'
+  el.style.top   = (y - 10) + 'px'
+  document.body.appendChild(el)
+  setTimeout(() => el.remove(), 900)
+}
+
+function shakeEnergyBar() {
+  const bar = document.querySelector('.energy-section')
+  bar.style.animation = 'none'
+  bar.offsetHeight
+  bar.style.animation = 'shake 0.4s ease'
+  setTimeout(() => bar.style.animation = '', 400)
+}
+
+/* ════════════════════════════════════════════════
+   DAILY REWARD CLAIM
+════════════════════════════════════════════════ */
+function claimDailyReward() {
+  if (state.dailyClaimed) { showToast('⏰','Already claimed! Come back tomorrow.'); return }
+  const reward = dailyData[state.dailyDay - 1].coins
+  state.coins += reward; state.availCoins += reward; state.dailyClaimed = true
+  updateCoinUI()
+  showToast('🎊', `You claimed ${reward} coins! Day ${state.dailyDay} reward!`)
+  const btn = document.getElementById('claimBtn')
+  btn.disabled = true; btn.textContent = '✅ Claimed! See you tomorrow'
+  const r = btn.getBoundingClientRect()
+  for (let i = 0; i < 8; i++) setTimeout(() => spawnCoinParticle(r.left+r.width/2, r.top), i*80)
+}
+
+/* ════════════════════════════════════════════════
+   REFERRAL SYSTEM
+════════════════════════════════════════════════ */
+
+// ── State ────────────────────────────────────────
+const referralState = {
+  code:      'YASH8X7K',
+  link:      'tapearn.app/r/YASH8X7K',
+  total:     14,
+  activated: 9,
+  pending:   5,
+  coinsEarned: 700,
+  list: [
+    { username: 'AlphaUser01', isActivated: true,  progressPct: 100, tapsNeeded: 0    },
+    { username: 'BetaTapper',  isActivated: true,  progressPct: 100, tapsNeeded: 0    },
+    { username: 'NewJoiner22', isActivated: false, progressPct: 47,  tapsNeeded: 53   },
+    { username: 'CryptoFan99', isActivated: false, progressPct: 12,  tapsNeeded: 88   },
+    { username: 'QuickClicker',isActivated: true,  progressPct: 100, tapsNeeded: 0    },
+  ],
+}
+
+// ── Render referral stats ────────────────────────
+function renderReferralStats() {
+  const s = referralState
+  document.getElementById('refTotal').textContent     = s.total
+  document.getElementById('refActivated').textContent = s.activated
+  document.getElementById('refPending').textContent   = s.pending
+  document.getElementById('refCoins').textContent     = s.coinsEarned.toLocaleString()
+  document.getElementById('refBadgeCount').textContent= `${s.total} Referred`
+  document.getElementById('refCodeDisplay').textContent = s.code
+  document.getElementById('refLink').value            = `tapearn.app/r/${s.code}`
+}
+
+// ── Render referral list ─────────────────────────
+function renderReferralList(list) {
+  const container = document.getElementById('referralList')
+  if (!list || list.length === 0) {
+    container.innerHTML = '<div class="ref-list-empty">📭 No referrals yet. Share your link!</div>'
+    return
+  }
+  container.innerHTML = list.map(r => `
+    <div class="ref-list-item">
+      <div class="ref-list-item-top">
+        <span class="ref-list-username">@${r.username}</span>
+        <span class="ref-list-status ${r.isActivated ? 'active' : 'pending'}">
+          ${r.isActivated ? '✅ Activated' : '⏳ Pending'}
+        </span>
+      </div>
+      <div class="ref-progress-wrap">
+        <div class="ref-progress-bar">
+          <div class="ref-progress-fill ${r.isActivated ? 'done' : ''}"
+               style="width:${r.progressPct}%"></div>
+        </div>
+        <span class="ref-progress-label">
+          ${r.isActivated
+            ? '🎉 Bonus paid'
+            : `${r.tapsNeeded} taps left`}
+        </span>
+      </div>
+    </div>
+  `).join('')
+}
+
+// ── Load from API (falls back to demo data) ──────
+async function loadReferralStats() {
+  try {
+    const token = getAuthToken()
+    if (!token) { renderReferralStats(); renderReferralList(referralState.list); return }
+
+    const res  = await fetch(`${API_BASE}/referral/stats`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    })
+    if (!res.ok) throw new Error('Not authed')
+    const { data } = await res.json()
+
+    referralState.code        = data.referralCode
+    referralState.link        = data.referralLink
+    referralState.total       = data.totalReferrals
+    referralState.activated   = data.activated
+    referralState.pending     = data.pending
+    referralState.coinsEarned = data.coinsEarned
+    referralState.list        = data.recentReferrals || []
+    renderReferralStats()
+    renderReferralList(referralState.list)
+  } catch {
+    // No auth / offline — show demo data
+    renderReferralStats()
+    renderReferralList(referralState.list)
+  }
+}
+
+// ── Load list on demand ──────────────────────────
+async function loadReferralList() {
+  const btn = document.querySelector('.ref-view-all')
+  if (btn) { btn.textContent = '⏳'; btn.disabled = true }
+  await loadReferralStats()
+  if (btn) { btn.textContent = 'Refresh ↻'; btn.disabled = false }
+  showToast('🔄', 'Referral list refreshed!')
+}
+
+// ── Copy referral link ───────────────────────────
+function copyReferral() {
+  const link = document.getElementById('refLink').value
+  navigator.clipboard.writeText(link)
+    .then(() => {
+      const btn = document.getElementById('copyBtn')
+      if (btn) { btn.textContent = '✅ Copied!'; setTimeout(() => btn.textContent = '📋 Copy', 2000) }
+      showToast('📋', 'Referral link copied to clipboard!')
+    })
+    .catch(() => showToast('📋', 'Link: ' + link))
+}
+
+// ── Share functions ──────────────────────────────
+function shareWhatsApp() {
+  const link = document.getElementById('refLink').value
+  const msg  = encodeURIComponent(`🪙 Join TapEarn and earn coins! Use my referral link: https://${link}`)
+  window.open(`https://wa.me/?text=${msg}`, '_blank')
+}
+function shareTwitter() {
+  const link = document.getElementById('refLink').value
+  const msg  = encodeURIComponent(`💰 I'm earning coins on TapEarn! Join me and get +20 bonus coins: https://${link} #TapEarn #Crypto`)
+  window.open(`https://twitter.com/intent/tweet?text=${msg}`, '_blank')
+}
+function shareNative() {
+  const link = document.getElementById('refLink').value
+  if (navigator.share) {
+    navigator.share({
+      title: '🪙 Join TapEarn',
+      text:  'Join me on TapEarn and earn coins by tapping! Get +20 bonus coins on signup.',
+      url:   `https://${link}`,
+    }).catch(() => {})
+  } else {
+    copyReferral()
+  }
+}
+
+// ── Validate a referral code ─────────────────────
+async function validateReferralCode() {
+  const input  = document.getElementById('validateInput')
+  const result = document.getElementById('validateResult')
+  const code   = input.value.trim().toUpperCase()
+
+  if (!code || code.length < 4) {
+    result.className = 'ref-validate-result err'
+    result.textContent = '⚠️ Please enter a valid code.'
+    return
+  }
+
+  result.className = 'ref-validate-result'
+  result.textContent = '⏳ Checking...'
+
+  try {
+    const res  = await fetch(`${API_BASE}/referral/validate`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ code }),
+    })
+    const data = await res.json()
+
+    if (res.ok && data.success) {
+      result.className = 'ref-validate-result ok'
+      result.textContent = `✅ Valid! Referred by ${data.data?.referrerName || 'a user'}. Join to claim +20 🪙`
+    } else {
+      result.className = 'ref-validate-result err'
+      result.textContent = `❌ ${data.message || 'Invalid code.'}`
+    }
+  } catch {
+    result.className = 'ref-validate-result ok'
+    result.textContent = `✅ Code looks valid! (offline mode)`
+  }
+
+  // Clear result after 8 seconds
+  setTimeout(() => { result.textContent = ''; result.className = 'ref-validate-result' }, 8000)
+}
+
+// ── Enter key on validate input ──────────────────
+document.getElementById('validateInput')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') validateReferralCode()
+})
+
+// ── Click code to copy it ────────────────────────
+document.getElementById('refCodeDisplay')?.addEventListener('click', () => {
+  const code = referralState.code
+  navigator.clipboard.writeText(code)
+    .then(() => showToast('🔑', `Code ${code} copied!`))
+    .catch(() => {})
+})
+
+// ── Init ─────────────────────────────────────────
+loadReferralStats()
+
+/* ════════════════════════════════════════════════
+   WITHDRAWAL SYSTEM
+════════════════════════════════════════════════ */
+
+// ── State ────────────────────────────────────────
+const wdState = {
+  selectedMethod: 'upi',
+  availableCoins: 98450,
+  pendingCoins:   0,
+  history: [
+    { _id: 'wd1', coinsRequested: 5000,  fiatAmount: 5.00,  paymentMethod: 'upi',    status: 'approved',  createdAt: '2026-07-08', adminNote: null },
+    { _id: 'wd2', coinsRequested: 3000,  fiatAmount: 3.00,  paymentMethod: 'paypal', status: 'pending',   createdAt: '2026-07-10', adminNote: null },
+    { _id: 'wd3', coinsRequested: 10000, fiatAmount: 10.00, paymentMethod: 'crypto', status: 'rejected',  createdAt: '2026-07-05', adminNote: 'Wallet address unverified.' },
+  ],
+}
+
+// ── Select payment method tab ─────────────────────
+function selectMethod(method) {
+  wdState.selectedMethod = method
+
+  // Update tab active state
+  document.querySelectorAll('.wd-method-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.method === method)
+  })
+
+  // Show/hide field groups
+  const methods = ['upi', 'paypal', 'bank_transfer', 'crypto']
+  methods.forEach(m => {
+    const el = document.getElementById('fields-' + m)
+    if (el) el.style.display = m === method ? 'block' : 'none'
+  })
+}
+
+// ── Live USD preview ──────────────────────────────
+function updateWdPreview() {
+  const coins = parseInt(document.getElementById('withdrawAmount').value) || 0
+  const usd   = (coins * 0.001).toFixed(2)
+  document.getElementById('wdPreviewVal').textContent = `$${usd}`
+}
+
+// ── Get payment details from form ─────────────────
+function getPaymentDetails() {
+  const method = wdState.selectedMethod
+  const d = {}
+  switch (method) {
+    case 'upi':
+      d.upiId = document.getElementById('upiId')?.value.trim()
+      if (!d.upiId) return { error: 'UPI ID is required.' }
+      if (!/^[\w.\-]{2,256}@[a-zA-Z]{2,64}$/.test(d.upiId)) return { error: 'Enter a valid UPI ID (e.g. name@bank).' }
+      break
+    case 'paypal':
+      d.paypalEmail = document.getElementById('paypalEmail')?.value.trim()
+      if (!d.paypalEmail || !/\S+@\S+\.\S+/.test(d.paypalEmail)) return { error: 'Enter a valid PayPal email.' }
+      break
+    case 'bank_transfer':
+      d.bankName           = document.getElementById('bankName')?.value.trim()
+      d.accountNumber      = document.getElementById('accountNumber')?.value.trim()
+      d.ifscCode           = document.getElementById('ifscCode')?.value.trim().toUpperCase()
+      d.accountHolderName  = document.getElementById('accountHolderName')?.value.trim()
+      if (!d.bankName)          return { error: 'Bank name is required.' }
+      if (!d.accountNumber)     return { error: 'Account number is required.' }
+      if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(d.ifscCode)) return { error: 'Enter valid IFSC code (e.g. SBIN0001234).' }
+      if (!d.accountHolderName) return { error: 'Account holder name is required.' }
+      break
+    case 'crypto':
+      d.cryptoCurrency = document.getElementById('cryptoCurrency')?.value
+      d.walletAddress  = document.getElementById('walletAddress')?.value.trim()
+      if (!d.walletAddress || d.walletAddress.length < 20) return { error: 'Enter a valid wallet address (min 20 chars).' }
+      break
+    default:
+      return { error: 'Select a payment method.' }
+  }
+  return { details: d }
+}
+
+// ── Submit withdrawal ─────────────────────────────
+async function submitWithdrawalReq() {
+  const amountInput = parseInt(document.getElementById('withdrawAmount').value)
+  const btn         = document.getElementById('wdSubmitBtn')
+
+  if (!amountInput || amountInput < 1000) { showToast('❌', 'Minimum withdrawal is 1,000 coins.'); return }
+  if (amountInput > wdState.availableCoins) { showToast('❌', 'Insufficient available balance.'); return }
+
+  const { details, error } = getPaymentDetails()
+  if (error) { showToast('❌', error); return }
+
+  // Disable button while submitting
+  btn.disabled = true; btn.textContent = '⏳ Submitting...'
+
+  try {
+    const token = getAuthToken()
+    let result
+
+    if (token) {
+      const res = await fetch(`${API_BASE}/withdrawal`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
+          coinsRequested: amountInput,
+          paymentMethod:  wdState.selectedMethod,
+          paymentDetails: details,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        showToast('❌', data.message || 'Withdrawal failed.')
+        btn.disabled = false; btn.textContent = '💸 Request Withdrawal'
+        return
+      }
+      result = data.data
+    } else {
+      // Demo mode — simulate response
+      result = {
+        withdrawalId: 'DEMO_' + Date.now(),
+        coinsRequested: amountInput,
+        fiatAmount: (amountInput * 0.001).toFixed(2),
+        status: 'pending',
+      }
+    }
+
+    // Optimistic UI update
+    wdState.availableCoins -= amountInput
+    wdState.pendingCoins   += amountInput
+    document.getElementById('wdAvailable').textContent = wdState.availableCoins.toLocaleString()
+    document.getElementById('wdPending').textContent   = wdState.pendingCoins.toLocaleString()
+    document.getElementById('wdUsd').textContent = `$${(wdState.availableCoins * 0.001).toFixed(2)}`
+    updateCoinUI()
+
+    // Add to local history and re-render
+    wdState.history.unshift({
+      _id:            result.withdrawalId,
+      coinsRequested: amountInput,
+      fiatAmount:     parseFloat(result.fiatAmount),
+      paymentMethod:  wdState.selectedMethod,
+      status:         'pending',
+      createdAt:      new Date().toISOString().split('T')[0],
+      adminNote:      null,
+    })
+    renderWdHistory(wdState.history)
+
+    // Reset form
+    document.getElementById('withdrawAmount').value = ''
+    document.getElementById('wdPreviewVal').textContent = '$0.00'
+    showToast('✅', `Withdrawal of ${amountInput.toLocaleString()} coins submitted! Awaiting admin approval.`)
+
+  } catch (err) {
+    showToast('⚠️', 'Network error. Please try again.')
+  }
+
+  btn.disabled = false; btn.textContent = '💸 Request Withdrawal'
+}
+
+// ── Render withdrawal history ─────────────────────
+function renderWdHistory(list) {
+  const container = document.getElementById('wdHistoryList')
+  if (!list || list.length === 0) {
+    container.innerHTML = '<div class="wd-history-empty">📭 No withdrawals yet. Submit your first request above!</div>'
+    return
+  }
+
+  const statusIcon = { pending: '⏳', processing: '🔄', approved: '✅', rejected: '❌', cancelled: '🚫' }
+  const methodIcon = { upi: '🇮🇳', paypal: '🅿️', bank_transfer: '🏦', crypto: '₿', gift_card: '🎁' }
+
+  container.innerHTML = list.map(w => `
+    <div class="wd-history-item">
+      <div class="wd-history-top">
+        <span class="wd-history-amount">${Number(w.coinsRequested).toLocaleString()} 🪙 ≈ $${Number(w.fiatAmount).toFixed(2)}</span>
+        <span class="wd-history-status ${w.status}">
+          ${statusIcon[w.status] || '?'} ${w.status.charAt(0).toUpperCase() + w.status.slice(1)}
+        </span>
+      </div>
+      <div class="wd-history-meta">
+        <span>${methodIcon[w.paymentMethod] || '💳'} ${w.paymentMethod.replace('_', ' ')}</span>
+        <span>📅 ${new Date(w.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'2-digit' })}</span>
+      </div>
+      ${w.adminNote ? `<div class="wd-history-note">ℹ️ ${w.adminNote}</div>` : ''}
+      ${w.status === 'pending' ? `<button class="wd-history-cancel" onclick="cancelWdRequest('${w._id}')">✕ Cancel Request</button>` : ''}
+    </div>
+  `).join('')
+}
+
+// ── Filter history ────────────────────────────────
+let wdFilterStatus = ''
+function filterWdHistory(status) {
+  wdFilterStatus = status
+  document.querySelectorAll('.wd-filter-btn').forEach(btn => btn.classList.remove('active'))
+  const idMap = { '': 'fAll', pending: 'fPending', approved: 'fApproved', rejected: 'fRejected' }
+  const el = document.getElementById(idMap[status])
+  if (el) el.classList.add('active')
+
+  const filtered = status ? wdState.history.filter(w => w.status === status) : wdState.history
+  renderWdHistory(filtered)
+}
+
+// ── Cancel withdrawal ─────────────────────────────
+async function cancelWdRequest(wdId) {
+  if (!confirm('Cancel this withdrawal request? Coins will be restored.')) return
+
+  const token = getAuthToken()
+  if (token) {
+    try {
+      const res = await fetch(`${API_BASE}/withdrawal/${wdId}/cancel`, {
+        method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` },
+      })
+      const data = await res.json()
+      if (!res.ok) { showToast('❌', data.message || 'Could not cancel.'); return }
+    } catch {
+      showToast('⚠️', 'Network error. Could not cancel.')
+      return
+    }
+  }
+
+  // Optimistic update
+  const wd = wdState.history.find(w => w._id === wdId)
+  if (wd) {
+    wdState.availableCoins += wd.coinsRequested
+    wdState.pendingCoins   -= wd.coinsRequested
+    wd.status = 'cancelled'
+    document.getElementById('wdAvailable').textContent = wdState.availableCoins.toLocaleString()
+    document.getElementById('wdPending').textContent   = wdState.pendingCoins.toLocaleString()
+    updateCoinUI()
+  }
+  renderWdHistory(wdState.history)
+  showToast('↩️', 'Withdrawal cancelled. Coins restored!')
+}
+
+// ── Load summary + history from API ──────────────
+async function loadWithdrawalData() {
+  const token = getAuthToken()
+  if (!token) {
+    renderWdHistory(wdState.history)
+    return
+  }
+  try {
+    const [summaryRes, historyRes] = await Promise.all([
+      fetch(`${API_BASE}/withdrawal/summary`,         { headers: { 'Authorization': `Bearer ${token}` } }),
+      fetch(`${API_BASE}/withdrawal/history?limit=10`,{ headers: { 'Authorization': `Bearer ${token}` } }),
+    ])
+
+    if (summaryRes.ok) {
+      const { data: s } = await summaryRes.json()
+      wdState.availableCoins = s.withdrawableBalance
+      wdState.pendingCoins   = s.pendingWithdrawal
+      document.getElementById('wdAvailable').textContent = s.withdrawableBalance.toLocaleString()
+      document.getElementById('wdPending').textContent   = s.pendingWithdrawal.toLocaleString()
+      document.getElementById('wdUsd').textContent       = `$${s.usdValue.toFixed(2)}`
+    }
+
+    if (historyRes.ok) {
+      const { data: h } = await historyRes.json()
+      wdState.history = h.withdrawals || []
+      renderWdHistory(wdState.history)
+    } else {
+      renderWdHistory(wdState.history)
+    }
+  } catch {
+    renderWdHistory(wdState.history)
+  }
+}
+
+// ── Init ─────────────────────────────────────────
+selectMethod('upi')
+loadWithdrawalData()
+
+/* ════════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════════ */
+let toastTimer = null
+function showToast(icon, msg) {
+  const toast = document.getElementById('toast')
+  document.getElementById('toastIcon').textContent = icon
+  document.getElementById('toastMsg').textContent  = msg
+  toast.classList.add('show')
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2800)
+}
+
+/* ════════════════════════════════════════════════
+   SIDEBAR MOBILE
+════════════════════════════════════════════════ */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open')
+  document.getElementById('sidebarOverlay').classList.toggle('show')
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open')
+  document.getElementById('sidebarOverlay').classList.remove('show')
+}
+
+/* ════════════════════════════════════════════════
+   NAV SWITCH
+════════════════════════════════════════════════ */
+function switchPage(page) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'))
+  const target = document.getElementById('nav-' + page)
+  if (target) target.classList.add('active')
+  if (window.innerWidth <= 768) closeSidebar()
+  const labels = {dashboard:'Dashboard',tap:'Tap to Earn',leaderboard:'Leaderboard',daily:'Daily Rewards',tasks:'Tasks',referral:'Referral',withdraw:'Withdraw',history:'History'}
+  document.querySelector('.topbar-title').textContent = `${labels[page] || page} 👋`
+  showToast('🧭', labels[page] + ' loaded')
+}
+
+/* ════════════════════════════════════════════════
+   KEYFRAME INJECTION
+════════════════════════════════════════════════ */
+const style = document.createElement('style')
+style.textContent = `
+  @keyframes shake {
+    0%,100%{ transform:translateX(0); }
+    20%    { transform:translateX(-6px); }
+    40%    { transform:translateX(6px); }
+    60%    { transform:translateX(-4px); }
+    80%    { transform:translateX(4px); }
+  }
+`
+document.head.appendChild(style)
+
+/* ════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════ */
+updateLifetimeUI()
+setRequestState('ok', 'Ready')
+console.log('🪙 TapEarn | Session:', state.sessionId, '| API:', API_BASE)
+  coins:         128450,
+  availCoins:    98450,
+  energy:        75,
+  maxEnergy:     100,
+  sessionCoins:  0,
+  sessionTaps:   0,
+  tapPower:      1,
+  dailyClaimed:  false,
+  dailyDay:      7,
+  streak:        7,
+}
+
+/* ════════════════════════════════════════════════
+   DAILY REWARDS INIT
+════════════════════════════════════════════════ */
+const dailyData = [
+  { coins: 50  },
+  { coins: 75  },
+  { coins: 100 },
+  { coins: 150 },
+  { coins: 200 },
+  { coins: 250 },
+  { coins: 500 },
+]
+const dayIcons = ['🌱','🌿','⚡','💫','🔥','🌟','🎊']
+
+function renderDailyDays() {
+  const container = document.getElementById('dailyDays')
+  container.innerHTML = ''
+  dailyData.forEach((d, i) => {
+    const div = document.createElement('div')
+    const dayNum = i + 1
+    let cls = 'daily-day'
+    if (dayNum < state.dailyDay) cls += ' claimed'
+    if (dayNum === state.dailyDay) cls += ' today'
+    div.className = cls
+    div.innerHTML = `
+      <span class="daily-day-icon">${dayNum < state.dailyDay ? '✅' : dayIcons[i]}</span>
+      <span class="daily-day-coins">${d.coins >= 100 ? (d.coins/1000*1).toFixed(0)+'00' : d.coins}🪙</span>
+      <span class="daily-day-num">D${dayNum}</span>
+    `
+    container.appendChild(div)
+  })
+}
+renderDailyDays()
+
+/* ════════════════════════════════════════════════
+   LEADERBOARD INIT
+════════════════════════════════════════════════ */
+const lbData = [
+  { name: 'CryptoKing99',  coins: 420880, taps: '420K', avatar: '👑', color: '#7c3aed', rank: 1,  change: 0 },
+  { name: 'TapMaster_X',   coins: 385420, taps: '385K', avatar: '🦁', color: '#d97706', rank: 2,  change: 1 },
+  { name: 'ClickQueen',    coins: 312500, taps: '312K', avatar: '👸', color: '#0891b2', rank: 3,  change: -1 },
+  { name: 'ZeroToHero',    coins: 278900, taps: '278K', avatar: '🚀', color: '#059669', rank: 4,  change: 2 },
+  { name: 'FastFingers',   coins: 241300, taps: '241K', avatar: '⚡', color: '#dc2626', rank: 5,  change: 0 },
+  { name: 'YashSharma',    coins: 128450, taps: '48K',  avatar: '😎', color: '#8b5cf6', rank: 47, change: 3, me: true },
+]
+
+function renderLeaderboard() {
+  const container = document.getElementById('leaderboardList')
+  container.innerHTML = ''
+  lbData.forEach(user => {
+    const item = document.createElement('div')
+    item.className = 'lb-item' + (user.me ? ' me' : '')
+
+    const rankClass = user.rank === 1 ? 'gold' : user.rank === 2 ? 'silver' : user.rank === 3 ? 'bronze' : 'normal'
+    const rankIcon  = user.rank === 1 ? '🥇' : user.rank === 2 ? '🥈' : user.rank === 3 ? '🥉' : `#${user.rank}`
+    const changeIcon = user.change > 0 ? `<span class="lb-change up">▲${user.change}</span>`
+                     : user.change < 0 ? `<span class="lb-change down">▼${Math.abs(user.change)}</span>`
+                     : `<span class="lb-change same">—</span>`
+
+    item.innerHTML = `
+      <div class="lb-rank ${rankClass}">${rankIcon}</div>
+      <div class="lb-avatar" style="background:${user.color}20;border:1px solid ${user.color}40;">${user.avatar}</div>
+      <div class="lb-info">
+        <div class="lb-name">${user.name} ${user.me ? '<span class="lb-me-label">YOU</span>' : ''}</div>
+        <div class="lb-taps">${user.taps} taps</div>
+      </div>
+      <div>
+        <div class="lb-coins">${(user.coins/1000).toFixed(1)}K</div>
+        ${changeIcon}
+      </div>
+    `
+    container.appendChild(item)
+  })
+}
+renderLeaderboard()
+
+/* ════════════════════════════════════════════════
+   TAP HANDLER
+════════════════════════════════════════════════ */
+function handleTap(e) {
+  if (state.energy <= 0) {
+    showToast('⚡','No energy left! Wait for refill...')
+    shakeEnergyBar()
+    return
+  }
+
+  // Deduct energy, add coins
+  state.energy        = Math.max(0, state.energy - 1)
+  const earned         = state.tapPower
+  state.coins         += earned
+  state.availCoins    += earned
+  state.sessionCoins  += earned
+  state.sessionTaps   += 1
+
+  // UI updates
+  updateEnergyUI()
+  updateCoinUI()
+  updateSessionUI()
+
+  // Tap button animation
+  const btn = document.getElementById('tapBtn')
+  btn.classList.add('tapping')
+  setTimeout(() => btn.classList.remove('tapping'), 80)
+
+  // Spawn coin particle at tap location
+  spawnCoinParticle(e.clientX, e.clientY)
+}
+
+function updateEnergyUI() {
+  const pct = (state.energy / state.maxEnergy) * 100
+  document.getElementById('energyFill').style.width = pct + '%'
+  document.getElementById('energyText').textContent = `${state.energy} / ${state.maxEnergy}`
+  document.getElementById('energyLeft').textContent = state.energy
+
+  const fill = document.getElementById('energyFill')
+  if (pct < 20) {
+    fill.style.background = 'linear-gradient(90deg, #dc2626, #ef4444)'
+  } else if (pct < 50) {
+    fill.style.background = 'linear-gradient(90deg, #d97706, #f59e0b)'
+  } else {
+    fill.style.background = 'linear-gradient(90deg, var(--purple-dark), var(--purple), var(--purple-light))'
+  }
+}
+
+function updateCoinUI() {
+  const fmt = (n) => n >= 1000000 ? (n/1000000).toFixed(2)+'M' : n >= 1000 ? n.toLocaleString() : n.toString()
+  document.getElementById('coinDisplay').textContent = fmt(state.coins)
+  document.getElementById('availCoins').textContent  = fmt(state.availCoins)
+}
+
+function updateSessionUI() {
+  document.getElementById('sessionCoins').textContent  = state.sessionCoins
+  document.getElementById('sessionTaps').textContent   = state.sessionTaps
+  document.getElementById('tapEarnedDisplay').textContent = `+${state.sessionCoins.toLocaleString()} coins today`
+}
+
+function shakeEnergyBar() {
+  const bar = document.querySelector('.energy-section')
+  bar.style.animation = 'none'
+  bar.offsetHeight
+  bar.style.animation = 'shake 0.4s ease'
+  setTimeout(() => bar.style.animation = '', 400)
+}
+
+/* ════════════════════════════════════════════════
+   COIN PARTICLE
+════════════════════════════════════════════════ */
+const COIN_ICONS = ['🪙','💰','⭐','✨']
+function spawnCoinParticle(x, y) {
+  for (let i = 0; i < 3; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div')
+      el.className = 'coin-particle'
+      el.textContent = COIN_ICONS[Math.floor(Math.random() * COIN_ICONS.length)]
+      el.style.left  = (x + (Math.random() - 0.5) * 60) + 'px'
+      el.style.top   = (y + (Math.random() - 0.5) * 20) + 'px'
+      document.body.appendChild(el)
+      setTimeout(() => el.remove(), 1000)
+    }, i * 60)
+  }
+}
+
+/* ════════════════════════════════════════════════
+   ENERGY AUTO-REFILL
+════════════════════════════════════════════════ */
+setInterval(() => {
+  if (state.energy < state.maxEnergy) {
+    state.energy = Math.min(state.maxEnergy, state.energy + 1)
+    updateEnergyUI()
+  }
+}, 30000)
+
+/* ════════════════════════════════════════════════
+   DAILY REWARD CLAIM
+════════════════════════════════════════════════ */
+function claimDailyReward() {
+  if (state.dailyClaimed) {
+    showToast('⏰', 'Already claimed! Come back tomorrow.')
+    return
+  }
+  const reward = dailyData[state.dailyDay - 1].coins
+  state.coins        += reward
+  state.availCoins   += reward
+  state.dailyClaimed  = true
+
+  updateCoinUI()
+  showToast('🎊', `You claimed ${reward} coins! Day ${state.dailyDay} reward!`)
+
+  const btn = document.getElementById('claimBtn')
+  btn.disabled    = true
+  btn.textContent = '✅ Claimed! See you tomorrow'
+
+  // Add a particle burst
+  const btnRect = btn.getBoundingClientRect()
+  for (let i = 0; i < 8; i++) {
+    setTimeout(() => spawnCoinParticle(
+      btnRect.left + btnRect.width / 2,
+      btnRect.top
+    ), i * 80)
+  }
+}
+
+/* ════════════════════════════════════════════════
+   REFERRAL COPY
+════════════════════════════════════════════════ */
+function copyReferral() {
+  const link = document.getElementById('refLink').value
+  navigator.clipboard.writeText(link).then(() => {
+    showToast('📋', 'Referral link copied to clipboard!')
+  }).catch(() => {
+    showToast('📋', 'Referral link: ' + link)
+  })
+}
+
+/* ════════════════════════════════════════════════
+   WITHDRAWAL SUBMIT
+════════════════════════════════════════════════ */
+function submitWithdrawal() {
+  const amount  = parseInt(document.getElementById('withdrawAmount').value)
+  const method  = document.getElementById('payMethod').value
+  const address = document.getElementById('payAddress').value.trim()
+
+  if (!amount || amount < 1000) {
+    showToast('❌', 'Minimum withdrawal is 1,000 coins.')
+    return
+  }
+  if (amount > state.availCoins) {
+    showToast('❌', 'Insufficient balance.')
+    return
+  }
+  if (!method) {
+    showToast('❌', 'Please select a payment method.')
+    return
+  }
+  if (!address) {
+    showToast('❌', 'Please enter your payment address.')
+    return
+  }
+
+  state.availCoins -= amount
+  updateCoinUI()
+  document.getElementById('withdrawAmount').value = ''
+  document.getElementById('payAddress').value     = ''
+  document.getElementById('payMethod').value      = ''
+  document.querySelector('.withdrawal-balance-amount').textContent = state.availCoins.toLocaleString()
+
+  showToast('✅', `Withdrawal of ${amount.toLocaleString()} coins submitted!`)
+}
+
+/* ════════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════════ */
+let toastTimer = null
+function showToast(icon, msg) {
+  const toast = document.getElementById('toast')
+  document.getElementById('toastIcon').textContent = icon
+  document.getElementById('toastMsg').textContent  = msg
+  toast.classList.add('show')
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2800)
+}
+
+/* ════════════════════════════════════════════════
+   SIDEBAR MOBILE
+════════════════════════════════════════════════ */
+function toggleSidebar() {
+  const sb      = document.getElementById('sidebar')
+  const overlay = document.getElementById('sidebarOverlay')
+  sb.classList.toggle('open')
+  overlay.classList.toggle('show')
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open')
+  document.getElementById('sidebarOverlay').classList.remove('show')
+}
+
+/* ════════════════════════════════════════════════
+   NAV SWITCH
+════════════════════════════════════════════════ */
+function switchPage(page) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'))
+  const target = document.getElementById('nav-' + page)
+  if (target) target.classList.add('active')
+  if (window.innerWidth <= 768) closeSidebar()
+  const labels = {
+    dashboard:   'Dashboard',
+    tap:         'Tap to Earn',
+    leaderboard: 'Leaderboard',
+    daily:       'Daily Rewards',
+    tasks:       'Tasks',
+    referral:    'Referral',
+    withdraw:    'Withdraw',
+    history:     'History',
+  }
+  document.querySelector('.topbar-title').textContent = `${labels[page] || page} 👋`
+  showToast('🧭', labels[page] + ' loaded')
+}
+
+/* ════════════════════════════════════════════════
+   CSS SHAKE KEYFRAME (injected dynamically)
+════════════════════════════════════════════════ */
+const style = document.createElement('style')
+style.textContent = `
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    40%      { transform: translateX(6px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+  }
+`
+document.head.appendChild(style)
+</script>
+</body>
+</html>
