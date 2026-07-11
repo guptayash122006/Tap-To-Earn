@@ -62,3 +62,33 @@ export const TAP = {
   SUSPICIOUS_SCORE_BLOCK:     90,
   REDUCED_REWARD_MULTIPLIER:  0.5,
 }
+
+/**
+ * AD_REWARD — Server-side ad reward configuration.
+ *
+ * POLICY NOTE: Ad rewards MUST only grant energy (non-withdrawable).
+ * Never add to Coin.availableBalance from ad callbacks.
+ * Source: Google AdSense Program Policies §2, H5 Games Ads policy.
+ */
+export const AD_REWARD = {
+  /** Types of rewards an ad can grant. 'energy' only — never 'coins'. */
+  ALLOWED_TYPES:    ['energy'],
+
+  /** Energy units restored per rewarded ad view. */
+  ENERGY_AMOUNT:    25,
+
+  /** Max energy cap — cannot exceed this value. */
+  MAX_ENERGY:       100,
+
+  /** Max additional energy we'll ever grant in one call (safety cap). */
+  MAX_ENERGY_GRANT: 50,
+
+  /** Max rewarded ads per hour per user (client + server both enforce). */
+  MAX_PER_HOUR:     5,
+
+  /** Minimum seconds between rewarded ad rewards. */
+  COOLDOWN_SEC:     60,
+
+  /** Max age of a reward request (seconds). Rejects stale/replayed requests. */
+  MAX_REQUEST_AGE_SEC: 120,
+}

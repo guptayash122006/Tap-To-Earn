@@ -3,6 +3,8 @@ import authRoutes        from './authRoutes.js'
 import tapRoutes         from './tapRoutes.js'
 import referralRoutes    from './referralRoutes.js'
 import withdrawalRoutes  from './withdrawalRoutes.js'
+import adminRoutes       from './adminRoutes.js'
+import adRoutes          from './adRoutes.js'
 // Future route imports go here:
 // import tapRoutes          from './tapRoutes.js'
 // import leaderboardRoutes  from './leaderboardRoutes.js'
@@ -30,6 +32,8 @@ router.use('/auth',       authRoutes)
 router.use('/tap',        tapRoutes)
 router.use('/referral',   referralRoutes)
 router.use('/withdrawal', withdrawalRoutes)
+router.use('/admin',      adminRoutes)
+router.use('/ads',        adRoutes)
 // router.use('/leaderboard',  leaderboardRoutes)
 // router.use('/referral',     referralRoutes)
 // router.use('/daily-reward', dailyRewardRoutes)

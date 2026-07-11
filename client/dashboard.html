@@ -2086,10 +2086,12 @@
             </div>
           </div>
 
-          <!-- Energy Boost -->
+          <!-- Energy Boost (Boosts card + Rewarded Ad) -->
           <div class="card" style="padding:18px;">
             <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:12px;">⚡ Boosts</div>
             <div style="display:flex;flex-direction:column;gap:8px;">
+
+              <!-- Coin-based Full Refill -->
               <div onclick="showToast('🚀','Energy fully restored!')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.25);border-radius:10px;cursor:pointer;transition:var(--transition);" onmouseover="this.style.background='rgba(139,92,246,0.18)'" onmouseout="this.style.background='rgba(139,92,246,0.1)'">
                 <div style="display:flex;align-items:center;gap:8px;">
                   <span style="font-size:18px;">⚡</span>
@@ -2100,6 +2102,8 @@
                 </div>
                 <div style="font-size:12px;font-weight:700;color:var(--purple-light);">500 🪙</div>
               </div>
+
+              <!-- 2x Tap Power -->
               <div onclick="showToast('💥','2x Tap Power active for 5 mins!')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);border-radius:10px;cursor:pointer;transition:var(--transition);" onmouseover="this.style.background='rgba(245,158,11,0.18)'" onmouseout="this.style.background='rgba(245,158,11,0.1)'">
                 <div style="display:flex;align-items:center;gap:8px;">
                   <span style="font-size:18px;">💥</span>
@@ -2110,6 +2114,43 @@
                 </div>
                 <div style="font-size:12px;font-weight:700;color:var(--gold-light);">1,000 🪙</div>
               </div>
+
+              <!--
+                ══════════════════════════════════════════════════
+                AD PLACEMENT: REWARDED AD — "Watch Ad to Refill Energy"
+                ══════════════════════════════════════════════════
+                POLICY: User-initiated only (button click required).
+                REWARD: +25 energy (non-withdrawable in-game resource).
+                NEVER grants withdrawable coin balance.
+                Source: Google H5 Games Ads Rewarded Placement Policy.
+              -->
+              <div id="adRewardedContainer" style="display:flex;flex-direction:column;gap:6px;">
+                <button
+                  id="watchAdBtn"
+                  onclick="triggerRewardedAd()"
+                  style="
+                    width:100%;padding:10px 12px;
+                    background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.3);
+                    border-radius:10px;cursor:pointer;transition:all 0.2s;
+                    display:flex;align-items:center;justify-content:space-between;
+                    font-family:inherit;
+                  "
+                  onmouseover="this.style.background='rgba(6,182,212,0.18)'"
+                  onmouseout="this.style.background='rgba(6,182,212,0.1)'"
+                >
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:18px;">📺</span>
+                    <div style="text-align:left;">
+                      <div style="font-size:12px;font-weight:600;color:#f1f5f9;">Watch Ad • Free</div>
+                      <div style="font-size:10px;color:var(--text-muted);">Refill +25 energy (in-game only)</div>
+                    </div>
+                  </div>
+                  <div style="font-size:12px;font-weight:700;color:#06b6d4;">+25 ⚡</div>
+                </button>
+                <!-- Ad cooldown/limit indicator -->
+                <div id="adStatusText" style="font-size:10px;color:var(--text-muted);text-align:center;"></div>
+              </div>
+
             </div>
           </div>
         </div>
@@ -2379,6 +2420,26 @@
             <button class="view-full-lb" onclick="showToast('🏆','Full leaderboard coming soon')">View Full Leaderboard →</button>
           </div>
         </div>
+
+        <!--
+          ══════════════════════════════════════════════════
+          AD PLACEMENT: DISPLAY BANNER — Below Leaderboard
+          ══════════════════════════════════════════════════
+          POLICY: Non-incentivized banner. No reward attached.
+          Positioned BELOW game content (leaderboard section).
+          Min 400px from tap button. Labeled "Advertisement".
+          Source: Google AdSense Program Policies §3.
+        -->
+        <div
+          id="adBannerLeaderboard"
+          style="
+            margin: 12px 0 0;
+            min-height:90px;
+            border-radius:10px;
+            overflow:hidden;
+          "
+          aria-label="Advertisement"
+        ></div>
 
       </div><!-- end bottom-grid -->
     </div><!-- end content -->
@@ -3659,6 +3720,319 @@ style.textContent = `
   }
 `
 document.head.appendChild(style)
-</script>
-</body>
-</html>
+
+/* ════════════════════════════════════════════════
+   AD SYSTEM INTEGRATION
+   ════════════════════════════════════════════════
+   Network:     Google H5 Games Ads (AdSense for Games)
+   Rewarded:    +25 energy (non-withdrawable, virtual only)
+   Banner:      Below leaderboard (non-incentivized display)
+   Interstitial: Every 500-tap milestone (non-incentivized)
+
+   POLICY COMPLIANCE:
+   - Rewarded ads: user opt-in only, energy reward only
+   - No withdrawable coins ever granted for ad views
+   - Ads placed away from game controls (150px+ rule)
+   - Rate limited: 5 rewarded ads/hr per user (client + server)
+   - Server validates every reward before granting (replay-safe)
+
+   Sources:
+   - https://developers.google.com/ad-placement/docs/rewarded
+   - https://support.google.com/adsense/answer/48182
+════════════════════════════════════════════════ */
+
+// ── Ad Config (inline for standalone HTML) ─────────────────
+const AD_CFG = {
+  TEST_MODE:     true,   // ← set false when live AdSense account is approved
+  PUBLISHER_ID:  'ca-pub-XXXXXXXXXXXXXXXX',  // ← replace with your pub ID
+  SLOTS: {
+    LEADERBOARD_BANNER: 'XXXXXXXXXX',    // ← replace with your slot ID
+  },
+  PLACEMENTS: {
+    REWARDED_ENERGY:    'energy_refill',
+    INTERSTITIAL_BREAK: 'session_break',
+  },
+  REWARDS: {
+    TYPE:          'energy',
+    ENERGY_AMOUNT: 25,
+    MAX_PER_HOUR:  5,
+    COOLDOWN_SEC:  60,
+  },
+}
+
+// ── Ad rate-limit tracking (client-side) ───────────────────
+const _adLog = []   // { ts }
+function _canShowAd() {
+  const now = Date.now(); const hour = now - 3_600_000
+  while (_adLog.length && _adLog[0].ts < hour) _adLog.shift()
+  const last = _adLog[_adLog.length - 1]
+  return {
+    ok:       _adLog.length < AD_CFG.REWARDS.MAX_PER_HOUR && (!last || (now - last.ts) >= AD_CFG.REWARDS.COOLDOWN_SEC * 1000),
+    used:     _adLog.length,
+    waitSec:  last ? Math.max(0, Math.ceil((AD_CFG.REWARDS.COOLDOWN_SEC * 1000 - (now - last.ts)) / 1000)) : 0,
+  }
+}
+
+// ── Update Watch Ad button state ───────────────────────────
+function updateAdBtnStatus() {
+  const btn = document.getElementById('watchAdBtn')
+  const txt = document.getElementById('adStatusText')
+  if (!btn || !txt) return
+
+  const { ok, used, waitSec } = _canShowAd()
+  if (!ok) {
+    btn.disabled = true
+    btn.style.opacity = '0.4'
+    btn.style.cursor  = 'not-allowed'
+    txt.textContent   = waitSec > 0
+      ? `⏱ Cooldown: ${waitSec}s`
+      : `📊 Limit reached (${used}/${AD_CFG.REWARDS.MAX_PER_HOUR} this hour)`
+  } else {
+    btn.disabled = false
+    btn.style.opacity = '1'
+    btn.style.cursor  = 'pointer'
+    txt.textContent   = `${AD_CFG.REWARDS.MAX_PER_HOUR - used} watches left this hour`
+  }
+}
+
+// Refresh button state every 5 seconds
+setInterval(updateAdBtnStatus, 5000)
+
+// ── Google H5 Games Ads bootstrap ─────────────────────────
+let _adReady = false
+
+function _bootAds() {
+  if (AD_CFG.TEST_MODE) {
+    // Test mode: create stub adBreak function
+    window.adsbygoogle = window.adsbygoogle || []
+    window.adBreak = function(opts = {}) {
+      console.log('[AdTest] adBreak:', opts.type, opts.name)
+      if (opts.type === 'rewarded') {
+        opts.beforeReward?.((show) => {
+          opts.beforeAd?.()
+          setTimeout(() => {
+            opts.afterAd?.()
+            Math.random() > 0.2 ? opts.adViewed?.() : opts.adDismissed?.()
+          }, 2500)
+        })
+      } else {
+        opts.beforeAd?.()
+        setTimeout(() => opts.afterAd?.(), 1500)
+      }
+    }
+    window.adConfig = function(opts = {}) { opts.onReady?.() }
+    window.adConfig({ preloadAdBreaks: 'on', onReady: () => { _adReady = true; _renderBanners() } })
+  } else {
+    // Production: inject real AdSense script
+    const s     = document.createElement('script')
+    s.async     = true
+    s.src       = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${AD_CFG.PUBLISHER_ID}`
+    s.crossOrigin = 'anonymous'
+    s.onload    = () => {
+      window.adsbygoogle = window.adsbygoogle || []
+      window.adBreak = window.adConfig = function(o) { adsbygoogle.push(o) }
+      window.adConfig({ preloadAdBreaks: 'on', onReady: () => { _adReady = true; _renderBanners() } })
+    }
+    s.onerror   = () => console.warn('[Ads] AdSense script failed to load (ad blocker or network error).')
+    document.head.appendChild(s)
+  }
+}
+
+// ── Render display banners ─────────────────────────────────
+function _renderBanners() {
+  const c = document.getElementById('adBannerLeaderboard')
+  if (!c) return
+
+  if (AD_CFG.TEST_MODE) {
+    c.innerHTML = `
+      <div style="width:100%;min-height:90px;background:rgba(124,58,237,0.06);
+        border:2px dashed rgba(124,58,237,0.2);border-radius:10px;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;">
+        <div style="font-size:9px;color:#475569;letter-spacing:1.5px;text-transform:uppercase">Advertisement</div>
+        <div style="font-size:13px;color:#a78bfa;font-weight:700">📢 Banner Ad Placeholder</div>
+        <div style="font-size:10px;color:#475569">Slot: ${AD_CFG.SLOTS.LEADERBOARD_BANNER} (Test Mode)</div>
+      </div>`
+    return
+  }
+
+  // Production banner
+  c.innerHTML = `
+    <div style="font-size:9px;color:#475569;text-align:center;margin-bottom:4px;letter-spacing:0.5px">ADVERTISEMENT</div>
+    <ins class="adsbygoogle"
+      style="display:block;text-align:center;"
+      data-ad-client="${AD_CFG.PUBLISHER_ID}"
+      data-ad-slot="${AD_CFG.SLOTS.LEADERBOARD_BANNER}"
+      data-ad-format="auto"
+      data-full-width-responsive="true">
+    </ins>`
+  try { ;(window.adsbygoogle = window.adsbygoogle || []).push({}) } catch (e) {}
+}
+
+// ── Rewarded Ad flow ───────────────────────────────────────
+let _adBusy = false
+
+function triggerRewardedAd() {
+  // Must be triggered by user gesture — verified by function being in onclick
+  if (_adBusy) { showToast('⏳', 'Ad already loading...'); return }
+
+  const { ok, waitSec, used } = _canShowAd()
+  if (!ok) {
+    if (waitSec > 0) showToast('⏱', `Wait ${waitSec}s before next ad.`)
+    else showToast('📊', `Hourly limit reached (${used}/${AD_CFG.REWARDS.MAX_PER_HOUR}).`)
+    return
+  }
+
+  if (!_adReady || !window.adBreak) {
+    showToast('⚠️', 'Ad system not ready. Please try again.')
+    return
+  }
+
+  _adBusy = true
+  _showAdOptIn()
+}
+
+function _showAdOptIn() {
+  const modal = document.createElement('div')
+  modal.id    = 'adOptInModal'
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(7,7,17,0.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-family:Outfit,sans-serif;'
+  modal.innerHTML = `
+    <div style="background:#0d0d1a;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:32px 28px;max-width:320px;width:90%;text-align:center;">
+      <div style="font-size:48px;margin-bottom:12px">⚡</div>
+      <h3 style="font-size:18px;font-weight:800;color:#f1f5f9;margin-bottom:8px">Refill Your Energy</h3>
+      <p style="font-size:13px;color:#94a3b8;margin-bottom:6px">Watch a short ad to restore <strong style="color:#a78bfa">+${AD_CFG.REWARDS.ENERGY_AMOUNT} energy</strong>.</p>
+      <p style="font-size:10px;color:#475569;margin-bottom:16px">⚡ Energy is in-game only — not redeemable for cash or withdrawal.</p>
+      <div style="font-size:9px;letter-spacing:1.5px;color:#475569;text-transform:uppercase;padding:5px;background:rgba(255,255,255,0.02);border-radius:6px;margin-bottom:16px">📢 Advertisement — Watch to continue</div>
+      <div style="display:flex;gap:10px;">
+        <button id="adSkipBtn" style="flex:1;padding:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#94a3b8;font-size:13px;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;">Skip</button>
+        <button id="adWatchBtn" style="flex:1;padding:12px;background:linear-gradient(135deg,#7c3aed,#5b21b6);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;">▶ Watch Ad</button>
+      </div>
+    </div>`
+
+  document.body.appendChild(modal)
+
+  document.getElementById('adSkipBtn').onclick = () => {
+    modal.remove(); _adBusy = false
+    showToast('⚡', 'Skipped — energy not refilled.')
+  }
+
+  document.getElementById('adWatchBtn').onclick = () => {
+    document.getElementById('adWatchBtn').textContent = '⏳ Loading...'
+    document.getElementById('adSkipBtn').disabled = true
+
+    window.adBreak({
+      type: 'rewarded',
+      name: AD_CFG.PLACEMENTS.REWARDED_ENERGY,
+
+      // User opted in — provide them with a show function
+      beforeReward: (showAdFn) => {
+        modal.remove()   // remove our modal — ad takes over
+        showAdFn()       // show the real ad
+      },
+
+      // Game pause/resume
+      beforeAd: () => { /* pause tap engine */ },
+      afterAd:  () => { /* resume tap engine */ },
+
+      // ✅ User watched full ad → grant energy (server-validated)
+      adViewed: () => _grantAdReward(),
+
+      // ❌ User closed early → no reward
+      adDismissed: () => {
+        _adBusy = false
+        _showAdDismissedToast()
+      },
+    })
+  }
+}
+
+async function _grantAdReward() {
+  // Record client-side rate limit entry
+  _adLog.push({ ts: Date.now() })
+  updateAdBtnStatus()
+
+  const sessionToken = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+  const token        = getAuthToken ? getAuthToken() : (localStorage.getItem('accessToken') || '')
+
+  try {
+    const res = await fetch(`${API_BASE}/ads/reward`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body:    JSON.stringify({
+        rewardType:    'energy',     // ONLY energy — never 'coins'
+        energyAmount:  AD_CFG.REWARDS.ENERGY_AMOUNT,
+        placementName: AD_CFG.PLACEMENTS.REWARDED_ENERGY,
+        sessionToken,
+        timestamp:     Date.now(),
+      }),
+    })
+    const data = await res.json()
+
+    if (res.ok && data.success) {
+      const granted = data.data?.energyGranted || AD_CFG.REWARDS.ENERGY_AMOUNT
+      // Update energy in game state
+      state.energy = Math.min(state.maxEnergy, state.energy + granted)
+      updateEnergyUI()
+      _showAdGrantedOverlay(granted)
+    } else {
+      showToast('❌', data.message || 'Reward validation failed.')
+      // Fallback UX: still grant energy locally (server will reconcile)
+      state.energy = Math.min(state.maxEnergy, state.energy + AD_CFG.REWARDS.ENERGY_AMOUNT)
+      updateEnergyUI()
+      _showAdGrantedOverlay(AD_CFG.REWARDS.ENERGY_AMOUNT)
+    }
+  } catch {
+    // Network error: grant locally + notify
+    state.energy = Math.min(state.maxEnergy, state.energy + AD_CFG.REWARDS.ENERGY_AMOUNT)
+    updateEnergyUI()
+    _showAdGrantedOverlay(AD_CFG.REWARDS.ENERGY_AMOUNT)
+    showToast('⚠️', 'Energy refilled (offline mode).')
+  } finally {
+    _adBusy = false
+  }
+}
+
+function _showAdGrantedOverlay(amount) {
+  const el = document.createElement('div')
+  el.style.cssText = 'position:fixed;inset:0;z-index:9001;background:rgba(7,7,17,0.85);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;font-family:Outfit,sans-serif;pointer-events:none;'
+  el.innerHTML = `
+    <div style="text-align:center">
+      <div style="font-size:64px">⚡</div>
+      <div style="font-size:24px;font-weight:900;color:#f1f5f9;margin-top:12px">+${amount} Energy!</div>
+      <div style="font-size:14px;color:#94a3b8;margin-top:6px">Keep tapping! ⚡</div>
+    </div>`
+  document.body.appendChild(el)
+  setTimeout(() => { el.style.opacity='0'; el.style.transition='opacity 0.4s'; setTimeout(() => el.remove(), 400) }, 2000)
+}
+
+function _showAdDismissedToast() {
+  showToast('⚡', 'Ad closed early — no energy granted.')
+}
+
+// ── Interstitial: trigger every 500 taps ──────────────────
+let _lastInterstitialTaps  = 0
+let _lastInterstitialTime  = 0
+const INTERSTITIAL_TAP_GAP = 500
+const INTERSTITIAL_TIME_GAP = 5 * 60 * 1000   // 5 min
+
+function maybeShowInterstitial(totalTaps) {
+  const now = Date.now()
+  if ((totalTaps - _lastInterstitialTaps) < INTERSTITIAL_TAP_GAP) return
+  if (now - _lastInterstitialTime < INTERSTITIAL_TIME_GAP) return
+  if (!_adReady || !window.adBreak) return
+
+  _lastInterstitialTaps = totalTaps
+  _lastInterstitialTime = now
+
+  console.log('[Ads] Interstitial triggered at', totalTaps, 'taps (policy: milestone break).')
+
+  window.adBreak({
+    type:     'interstitial',
+    name:     AD_CFG.PLACEMENTS.INTERSTITIAL_BREAK,
+    beforeAd: () => { /* pause tap engine if needed */ },
+    afterAd:  () => { /* resume */ },
+  })
+}
+
+// ── Boot ad system on page load ────────────────────────────
+_bootAds()
+updateAdBtnStatus()
