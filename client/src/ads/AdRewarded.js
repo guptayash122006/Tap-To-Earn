@@ -32,8 +32,7 @@ import {
   recordRewardedAdView,
   policyLog,
 } from './adPolicyGuard.js'
-
-const API_BASE = 'http://localhost:5000/api'
+import { API_BASE_URL as API_BASE } from '../api/axiosInstance.js'
 
 export class AdRewarded {
   /**
