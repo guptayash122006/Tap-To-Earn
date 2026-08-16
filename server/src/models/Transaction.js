@@ -75,15 +75,20 @@ const transactionSchema = new mongoose.Schema(
     },
 
     // ── Metadata ──────────────────────────────────────────
-    metadata: {
-      tapCount: { type: Number, default: null },   // for batched taps
-      streakDay: { type: Number, default: null },  // for daily rewards
-      adId: { type: String, default: null },       // for ad rewards
-      taskTitle: { type: String, default: null },  // for task rewards
-      adminNote: { type: String, default: null },  // for admin grants
-      ipAddress: { type: String, default: null },
-    },
+   metadata: {
+  tapCount: { type: Number, default: null },
+  streakDay: { type: Number, default: null },
+  adId: { type: String, default: null },
+  taskTitle: { type: String, default: null },
+  adminNote: { type: String, default: null },
+  ipAddress: { type: String, default: null },
 
+  // AdGem
+  adgemRequestId: { type: String, default: null },
+  adgemConversionId: { type: String, default: null },
+  adgemGoalId: { type: String, default: null },
+  adgemPayout: { type: Number, default: null },
+},
     // ── Status ────────────────────────────────────────────
     status: {
       type: String,

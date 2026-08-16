@@ -4,10 +4,25 @@ import protect    from '../middleware/authMiddleware.js'
 import asyncHandler from '../utils/asyncHandler.js'
 import ApiResponse  from '../utils/apiResponse.js'
 import { validateAndGrantAdReward, getAdStatus } from '../services/adRewardService.js'
+import { processAdGemPostback } from '../services/adGemService.js'
 
 const router = express.Router()
 
 // ── Rate limiter: 10 ad reward attempts per hour per IP ────────
+
+// ── AdGem Server Postback ────────────────────────────────
+// Public endpoint — AdGem calls this directly
+router.get(
+  '/adgem/postback',
+  asyncHandler(async (req, res) => {
+    const result = await processAdGemPostback(req)
+
+    return res.status(200).json({
+      success: true,
+      ...result,
+    })
+  })
+)
 const adLimiter = rateLimit({
   windowMs:        60 * 60 * 1000,
   max:             10,
