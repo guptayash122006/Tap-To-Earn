@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import bcrypt from 'bcryptjs'
+import { GAME } from '../config/constants.js'
 
 const userSchema = new mongoose.Schema(
   {
@@ -232,6 +233,26 @@ userSchema.virtual('canClaimDailyReward').get(function () {
 // ── Instance Methods ─────────────────────────────────────
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.passwordHash)
+}
+
+userSchema.methods.regenerateEnergy = function () {
+  if (this.energy >= this.maxEnergy) {
+    this.lastEnergyRefillAt = new Date()
+    return this
+  }
+
+  const now = new Date()
+  const elapsedMs = now.getTime() - this.lastEnergyRefillAt.getTime()
+  const intervalMs = (GAME.ENERGY_REFILL_INTERVAL_SEC || 30) * 1000
+  const refillRate = this.energyRefillRate || 1
+
+  if (elapsedMs >= intervalMs) {
+    const ticks = Math.floor(elapsedMs / intervalMs)
+    const energyToAdd = ticks * refillRate
+    this.energy = Math.min(this.maxEnergy, this.energy + energyToAdd)
+    this.lastEnergyRefillAt = new Date(this.lastEnergyRefillAt.getTime() + ticks * intervalMs)
+  }
+  return this
 }
 
 userSchema.methods.toSafeObject = function () {

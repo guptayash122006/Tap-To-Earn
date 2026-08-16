@@ -33,7 +33,7 @@ export const authValidator = {
       }),
 
     body('referralCode')
-      .optional()
+      .optional({ values: 'falsy' })
       .trim()
       .isLength({ min: 6, max: 12 }).withMessage('Invalid referral code format.')
       .isAlphanumeric().withMessage('Referral code must be alphanumeric.'),

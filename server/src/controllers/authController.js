@@ -43,9 +43,6 @@ export const register = asyncHandler(async (req, res) => {
     codeExists = await User.exists({ referralCode: newReferralCode })
   }
 
-  // ── Hash password ─────────────────────────────────────
-  const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS)
-
   // ── Create user + wallet + referral in a transaction ─
   const session = await mongoose.startSession()
   session.startTransaction()
@@ -57,7 +54,7 @@ export const register = asyncHandler(async (req, res) => {
         {
           username,
           email:           email.toLowerCase(),
-          passwordHash,
+          passwordHash:    password,
           referralCode:    newReferralCode,
           referredBy:      referrer ? referrer._id : null,
           energy:          GAME.DEFAULT_MAX_ENERGY,
@@ -270,16 +267,17 @@ export const logout = asyncHandler(async (req, res) => {
 // GET /api/auth/me
 // ─────────────────────────────────────────────────────────────
 export const getMe = asyncHandler(async (req, res) => {
-  // req.user already attached by protect middleware (no passwordHash)
   const user = await User.findById(req.user._id)
-    .select('-passwordHash -refreshToken -refreshTokenExpiresAt')
-    .lean()
+  if (user) {
+    user.regenerateEnergy()
+    await user.save()
+  }
 
   // Also fetch coin wallet for full profile
   const wallet = await Coin.findOne({ userId: req.user._id }).lean()
 
   return ApiResponse.success(res, 200, 'Profile fetched successfully.', {
-    user,
+    user: user ? user.toSafeObject() : null,
     wallet: wallet || null,
   })
 })
@@ -297,7 +295,7 @@ export const changePassword = asyncHandler(async (req, res) => {
     return ApiResponse.error(res, 401, 'Current password is incorrect.')
   }
 
-  user.passwordHash          = await bcrypt.hash(newPassword, BCRYPT_ROUNDS)
+  user.passwordHash          = newPassword
   user.refreshToken          = null   // force re-login on all devices
   user.refreshTokenExpiresAt = null
   await user.save()

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import env from './env.js'
+import DailyReward from '../models/DailyReward.js'
 
 const MONGO_OPTIONS = {
   maxPoolSize:       10,
@@ -16,6 +17,10 @@ const connectDB = async () => {
     const conn = await mongoose.connect(env.MONGODB_URI, MONGO_OPTIONS)
     isConnected = true
     console.log(`✅  MongoDB connected: ${conn.connection.host}`)
+
+    // Seed default daily rewards
+    await DailyReward.seedDefaults()
+    console.log('🌱  Default daily rewards verified/seeded.')
 
     // Graceful shutdown
     process.on('SIGINT', async () => {

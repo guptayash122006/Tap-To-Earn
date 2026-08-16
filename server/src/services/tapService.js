@@ -124,12 +124,13 @@ export const validateAndProcessTap = async (userId, {
 }) => {
   // ── Load user ─────────────────────────────────────────────
   const user = await User.findById(userId).select(
-    'energy maxEnergy totalTaps tapPower status username'
+    'energy maxEnergy totalTaps tapPower status username lastEnergyRefillAt energyRefillRate'
   )
 
   if (!user) {
     const err = new Error('User not found.'); err.code = 'USER_NOT_FOUND'; throw err
   }
+  user.regenerateEnergy()
   if (user.status !== 'active') {
     const err = new Error('Account is not active.'); err.code = 'ACCOUNT_INACTIVE'; throw err
   }
@@ -190,16 +191,11 @@ export const validateAndProcessTap = async (userId, {
   let savedTapSession
   try {
     // 1. Deduct energy, increment totalTaps
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      {
-        $inc: {
-          energy:    -clampedCount,
-          totalTaps: clampedCount,
-        },
-      },
-      { new: true, session }
-    )
+    const updatedUser = await User.findById(userId).session(session)
+    updatedUser.regenerateEnergy()
+    updatedUser.energy = Math.max(0, updatedUser.energy - clampedCount)
+    updatedUser.totalTaps += clampedCount
+    await updatedUser.save({ session })
 
     const energyAfter = updatedUser.energy
 
@@ -297,12 +293,15 @@ export const validateAndProcessTap = async (userId, {
  */
 export const getUserTapStatus = async (userId) => {
   const user = await User.findById(userId).select(
-    'energy maxEnergy totalTaps tapPower lastEnergyRefillAt'
+    'energy maxEnergy totalTaps tapPower lastEnergyRefillAt energyRefillRate'
   )
 
   if (!user) {
     const err = new Error('User not found.'); err.code = 'USER_NOT_FOUND'; throw err
   }
+
+  user.regenerateEnergy()
+  await user.save()
 
   const todayTaps = await TapSession.getDailyTapCount(userId)
 

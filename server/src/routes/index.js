@@ -5,15 +5,9 @@ import referralRoutes    from './referralRoutes.js'
 import withdrawalRoutes  from './withdrawalRoutes.js'
 import adminRoutes       from './adminRoutes.js'
 import adRoutes          from './adRoutes.js'
-// Future route imports go here:
-// import tapRoutes          from './tapRoutes.js'
-// import leaderboardRoutes  from './leaderboardRoutes.js'
-// import referralRoutes     from './referralRoutes.js'
-// import dailyRewardRoutes  from './dailyRewardRoutes.js'
-// import withdrawalRoutes   from './withdrawalRoutes.js'
-// import transactionRoutes  from './transactionRoutes.js'
-// import userRoutes         from './userRoutes.js'
-// import adminRoutes        from './adminRoutes.js'
+import dailyRewardRoutes from './dailyRewardRoutes.js'
+import leaderboardRoutes from './leaderboardRoutes.js'
+import transactionRoutes from './transactionRoutes.js'
 
 const router = express.Router()
 
@@ -28,18 +22,14 @@ router.get('/health', (req, res) => {
 })
 
 // ── Mount Feature Routes ──────────────────────────────────
-router.use('/auth',       authRoutes)
-router.use('/tap',        tapRoutes)
-router.use('/referral',   referralRoutes)
-router.use('/withdrawal', withdrawalRoutes)
-router.use('/admin',      adminRoutes)
-router.use('/ads',        adRoutes)
-// router.use('/leaderboard',  leaderboardRoutes)
-// router.use('/referral',     referralRoutes)
-// router.use('/daily-reward', dailyRewardRoutes)
-// router.use('/withdrawal',   withdrawalRoutes)
-// router.use('/transactions', transactionRoutes)
-// router.use('/user',         userRoutes)
-// router.use('/admin',        adminRoutes)
+router.use('/auth',          authRoutes)
+router.use('/tap',           tapRoutes)
+router.use('/referral',      referralRoutes)
+router.use('/withdrawal',    withdrawalRoutes)
+router.use('/admin',         adminRoutes)
+router.use('/ads',           adRoutes)
+router.use('/daily-reward',  dailyRewardRoutes)
+router.use('/leaderboard',   leaderboardRoutes)
+router.use('/transactions',  transactionRoutes)
 
 export default router
